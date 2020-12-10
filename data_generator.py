@@ -44,9 +44,12 @@ def getUniformPoints(num, filename, dim):
 
 def getNormalPoints(num, filename, dim):
     locations_tf = []
+    tf.compat.v1.disable_eager_execution() 
     for i in range(dim):
-        # locations_tf.append(tf.random.truncated_normal([num * 2, 1], mean=0.5, stddev=0.125, dtype=tf.float32))
-        locations_tf.append(tf.random_normal([num * 2, 1], mean=0.5, stddev=0.125, dtype=tf.float32))
+        #locations_tf.append(tf.random.truncated_normal([num * 2, 1], mean=0.5, stddev=0.125, dtype=tf.float32))
+        
+        #locations_tf.append(tf.random_normal([num * 2, 1], mean=0.5, stddev=0.125, dtype=tf.float32))
+        locations_tf.append(tf.random.normal([num * 2, 1], mean=0.5, stddev=0.125, dtype=tf.float32))
     with tf.compat.v1.Session() as sees:
         locations = []
         for i in range(dim):
@@ -76,6 +79,7 @@ def getNormalPoints(num, filename, dim):
 
 def getSkewedPoints(num, a, filename, dim):
     locations_tf = []
+    tf.compat.v1.disable_eager_execution() 
     for i in range(dim):
         locations_tf.append(tf.random.truncated_normal([num, 1], mean=0.5, stddev=0.25, dtype=tf.float32))
     with tf.compat.v1.Session() as sees:

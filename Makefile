@@ -1,4 +1,4 @@
-CC=g++ -O3 -std=c++14
+CC=g++ -O3 -std=c++14#14
 SRCS=$(wildcard *.cpp */*.cpp)
 OBJS=$(patsubst %.cpp, %.o, $(SRCS))
 
@@ -12,20 +12,20 @@ TYPE = CPU
 
 # for linux
 ifeq ($(TYPE), GPU)
-	INCLUDE = -I/home/liuguanli/Documents/libtorch_gpu/include -I/home/liuguanli/Documents/libtorch_gpu/include/torch/csrc/api/include
-	LIB +=-L/home/liuguanli/Documents/libtorch_gpu/lib -ltorch -lc10 -lpthread
-	FLAG = -Wl,-rpath=/home/liuguanli/Documents/libtorch_gpu/lib
+	INCLUDE = -I/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch_gpu/include -I/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch_gpu/include/torch/csrc/api/include
+	LIB +=-L/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch_gpu/lib -ltorch -lc10 -lpthread
+	FLAG = -Wl,-rpath=/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch_gpu/lib
 else
-	INCLUDE = -I/home/liuguanli/Documents/libtorch/include -I/home/liuguanli/Documents/libtorch/include/torch/csrc/api/include
-	LIB +=-L/home/liuguanli/Documents/libtorch/lib -ltorch -lc10 -lpthread
-	FLAG = -Wl,-rpath=/home/liuguanli/Documents/libtorch/lib
+	INCLUDE = -I/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/include -I/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/include/torch/csrc/api/include -I/mnt/d/boost_1_73_0
+	LIB +=-L/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/lib -ltorch -lc10 -lpthread
+	FLAG = -Wl,-rpath=/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/lib
 endif
 
 
 
-# INCLUDE = -I/home/liuguanli/Documents/libtorch/include -I/home/liuguanli/Documents/libtorch/include/torch/csrc/api/include
-# LIB +=-L/home/liuguanli/Documents/libtorch/lib -ltorch -lc10 -lpthread
-# FLAG = -Wl,-rpath=/home/liuguanli/Documents/libtorch/lib
+# INCLUDE = -I/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch/include -I/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch/include/torch/csrc/api/include
+# LIB +=-L/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch/lib -ltorch -lc10 -lpthread
+# FLAG = -Wl,-rpath=/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch/lib
 
 NAME=$(wildcard *.cpp)
 TARGET=$(patsubst %.cpp, %, $(NAME))
@@ -40,3 +40,5 @@ clean:
 	rm -rf $(TARGET) $(OBJS)
 
 # # g++ -std=c++11 Exp.cpp FileReader.o -ltensorflow -o Exp_tf
+
+# g++ -O3 -std=c++14 -o Exp Exp.o utils/FileReader.o utils/ExpRecorder.o utils/Constants.o utils/FileWriter.o entities/Mbr.o entities/NodeExtend.o entities/NonLeafNode.o entities/LeafNode.o entities/Node.o entities/Point.o curves/hilbert.o curves/z.o curves/hilbert4.o -I/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch/include -I/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch/include/torch/csrc/api/include -I/mnt/d//boost_1_73_0 -L/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch/lib -ltorch -lc10 -lpthread -Wl,-rpath=/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch/lib
