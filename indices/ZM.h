@@ -430,9 +430,9 @@ void ZM::point_query(ExpRecorder &exp_recorder, vector<Point> query_points)
     }
     auto finish = chrono::high_resolution_clock::now();
     exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count() / query_points.size();
-    cout << "finish point_query: pageaccess:" << exp_recorder.page_access << endl;
+    //cout << "finish point_query: pageaccess:" << exp_recorder.page_access << endl;
     exp_recorder.page_access = exp_recorder.page_access / query_points.size();
-    cout << "finish point_query time: " << exp_recorder.time << endl;
+    //cout << "finish point_query time: " << exp_recorder.time << endl;
 }
 
 void ZM::point_query_after_update(ExpRecorder &exp_recorder, vector<Point> query_points)
@@ -445,7 +445,7 @@ void ZM::point_query_after_update(ExpRecorder &exp_recorder, vector<Point> query
     auto finish = chrono::high_resolution_clock::now();
     exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count() / query_points.size();
     exp_recorder.page_access = (double)exp_recorder.page_access / query_points.size();
-    cout<< "point_query_after_update time: " << exp_recorder.time << endl;
+    //cout<< "point_query_after_update time: " << exp_recorder.time << endl;
 }
 
 long long ZM::get_point_index(ExpRecorder &exp_recorder, Point query_point)
@@ -732,7 +732,7 @@ void ZM::insert(ExpRecorder &exp_recorder, vector<Point> points)
     long long old_time_cost = exp_recorder.insert_time * exp_recorder.insert_num;
     exp_recorder.insert_num += points.size();
     exp_recorder.insert_time = (old_time_cost + chrono::duration_cast<chrono::nanoseconds>(finish - start).count()) / exp_recorder.insert_num;
-    cout<< "exp_recorder.insert_time: " << exp_recorder.insert_time << endl;
+    //cout<< "insert_time: " << exp_recorder.insert_time << endl;
 }
 
 void ZM::remove(ExpRecorder &exp_recorder, Point point)
