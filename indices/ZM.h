@@ -352,7 +352,7 @@ void ZM::point_query(ExpRecorder &exp_recorder, Point query_point)
             exp_recorder.page_access += 1;
             if (iter != leafnode->children->end())
             {
-                // cout << "find it" << endl;
+                cout << "find it" << endl;
                 break;
             }
         }
@@ -526,14 +526,18 @@ void ZM::window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows)
 {
     cout << "ZM::window_query" << endl;
     auto start = chrono::high_resolution_clock::now();
+    ofstream outputfile("window_query_results_size.txt");
     for (int i = 0; i < query_windows.size(); i++)
     {
         vector<Point> window_query_results = window_query(exp_recorder, query_windows[i]);
         exp_recorder.window_query_result_size += window_query_results.size();
+        outputfile << window_query_results.size() << endl;
     }
+    outputfile.close();
     auto finish = chrono::high_resolution_clock::now();
     exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count() / query_windows.size();
     exp_recorder.page_access = (double)exp_recorder.page_access / query_windows.size();
+
 }
 
 vector<Point> ZM::acc_window_query(ExpRecorder &exp_recorder, Mbr query_window)
@@ -731,8 +735,9 @@ void ZM::insert(ExpRecorder &exp_recorder, vector<Point> points)
     auto finish = chrono::high_resolution_clock::now();
     long long old_time_cost = exp_recorder.insert_time * exp_recorder.insert_num;
     exp_recorder.insert_num += points.size();
-    exp_recorder.insert_time = (old_time_cost + chrono::duration_cast<chrono::nanoseconds>(finish - start).count()) / exp_recorder.insert_num;
+    //exp_recorder.insert_time = (old_time_cost + chrono::duration_cast<chrono::nanoseconds>(finish - start).count()) / exp_recorder.insert_num;
     //cout<< "insert_time: " << exp_recorder.insert_time << endl;
+    exp_recorder.insert_time = (chrono::duration_cast<chrono::nanoseconds>(finish - start).count()) / exp_recorder.insert_num;
 }
 
 void ZM::remove(ExpRecorder &exp_recorder, Point point)
