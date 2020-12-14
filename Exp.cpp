@@ -68,6 +68,7 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     RSMI *partition = new RSMI(0,  Constants::MAX_WIDTH);
     auto start = chrono::high_resolution_clock::now();
     partition->model_path = model_path;
+    cout << "building RSMI" << endl;
     partition->build(exp_recorder, points);
     auto finish = chrono::high_resolution_clock::now();
     exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
