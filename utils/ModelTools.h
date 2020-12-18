@@ -114,6 +114,7 @@ public:
         torch::Tensor p2 = this->parameters()[1];
         torch::Tensor p3 = this->parameters()[2];
         torch::Tensor p4 = this->parameters()[3];
+        //width = p1.sizes()[0];
         p1 = p1.reshape({2 * width, 1});
         for (size_t i = 0; i < width; i++)
         {
@@ -196,6 +197,7 @@ public:
         x = torch::relu(fc1->forward(x));
         cout << x << endl;
         x = fc2->forward(x);
+        cout << x << endl;
         return x;
     }
 
@@ -209,7 +211,7 @@ public:
 
     float predictZM(float key)
     {
-         float result;
+         float result = 0;
          for (size_t i = 0; i < Constants::HIDDEN_LAYER_WIDTH; i++)
          {
              result += activation(key * w1_[i] + b1[i]) * w2[i];
@@ -219,19 +221,17 @@ public:
     }
     float my_predictZM(float key)
     {
-         float result;
-         float x[Constants::HIDDEN_LAYER_WIDTH];
+         float result = 0;
+         float tmp;
+         cout << "my_predictZM" << endl;
          for (size_t i = 0; i < Constants::HIDDEN_LAYER_WIDTH; i++)
          {
-             x[i] = activation(key * w1_[i] + b1[i]);
-         }
-         cout << "my_predictZm" << endl;
-         cout << x << endl;
-         for (size_t i = 0; i < Constants::HIDDEN_LAYER_WIDTH; i++)
-         {
-             result += x[i] * w2[i];
+             tmp = activation(key * w1_[i] + b1[i]);
+             result += tmp * w2[i];
+             cout << tmp << " , w2[i]: " << w2[i] << " , tmp*w2[i]: " << tmp*w2[i] << " , result: " << result << endl;
          }
          result += b2;
+         cout << result << ", b2: " << b2 << endl;
          return result;
     }
     float predict_ZM(float key)
@@ -246,7 +246,7 @@ public:
         // _mm_load1_ps
         fLoad0_x = _mm_set_ps(key, key, key, key);
         fLoad0_zeros = _mm_set_ps(0, 0, 0, 0);
-        float result;
+        float result = 0;
         for (int i = 0; i < blocks; i++)
         {
             // TODO change w1

@@ -60,6 +60,7 @@ double knn_diff(vector<Point> acc, vector<Point> pred)
     return num * 1.0 / pred.size();
 }
 
+
 void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> points, map<string, vector<Mbr>> mbrs_map, vector<Point> query_poitns, vector<Point> insert_points, string model_path)
 {
     exp_recorder.clean();
@@ -68,6 +69,7 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     RSMI *partition = new RSMI(0,  Constants::MAX_WIDTH);
     auto start = chrono::high_resolution_clock::now();
     partition->model_path = model_path;
+    cout << "building RSMI" << endl;
     partition->build(exp_recorder, points);
     auto finish = chrono::high_resolution_clock::now();
     exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
@@ -116,7 +118,6 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     cout << "finish point_query time: " << exp_recorder.time << endl;
     exp_recorder.clean();
 }
-
 
 void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> points, map<string, vector<Mbr>> mbrs_map, vector<Point> query_poitns, vector<Point> insert_points, string model_path)
 {
@@ -186,15 +187,17 @@ int main(int argc, char **argv)
     int c;
     static struct option long_options[] =
     {
-        {"cardinality", required_argument,NULL,'c'},
-        {"distribution",required_argument,      NULL,'d'},
-        {"skewness", required_argument,      NULL,'s'}
+        {"cardinality" , required_argument , NULL , 'c'},
+        {"distribution" , required_argument , NULL , 'd'},
+        {"skewness" , required_argument , NULL , 's'},
+        {"zm_flag" , no_argument , NULL , 'z'}
     };
+    bool zm_flag = false;
 
     while(1)
     {
         int opt_index = 0;
-        c = getopt_long(argc, argv,"c:d:s:", long_options,&opt_index);
+        c = getopt_long(argc, argv,"c:d:s:z", long_options,&opt_index);
         
         if(-1 == c)
         {
@@ -210,6 +213,9 @@ int main(int argc, char **argv)
                 break;
             case 's':
                 skewness = atoi(optarg);
+                break;
+            case 'z':
+                zm_flag = true;
                 break;
         }
     }
@@ -266,7 +272,13 @@ int main(int argc, char **argv)
     file_utils::check_dir(model_root_path);
     string model_path = model_root_path + "/";
     FileWriter file_writer(Constants::RECORDS);
-    exp_ZM(file_writer, exp_recorder, points, mbrs_map, query_poitns, insert_points, model_path);
+    if(zm_flag){
+        exp_ZM(file_writer, exp_recorder, points, mbrs_map, query_poitns, insert_points, model_path);
+    }else{
+        exp_RSMI(file_writer, exp_recorder, points, mbrs_map, query_poitns, insert_points, model_path);
+        //exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> points, map<string, vector<Mbr>> mbrs_map, vector<Point> query_poitns, vector<Point> insert_points, string model_path)
+    }
+    
 }
 
 #endif  // use_gpu
