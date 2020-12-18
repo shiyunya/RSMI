@@ -182,6 +182,7 @@ void ZM::build(ExpRecorder &exp_recorder, vector<Point> points)
 
     for (size_t i = 0; i < stages.size(); i++)
     {
+        cout << "building the " << i << "st stage" << endl;
         // initialize
         vector<std::shared_ptr<Net>> temp_index;
         vector<vector<Point>> temp_points;
@@ -198,7 +199,7 @@ void ZM::build(ExpRecorder &exp_recorder, vector<Point> points)
         }
         else
         {
-            next_stage_length = N;
+            next_stage_length = N;//
         }
         // build
         for (size_t j = 0; j < stages[i]; j++)
@@ -324,7 +325,8 @@ void ZM::point_query(ExpRecorder &exp_recorder, Point query_point)
         {
             next_stage_length = stages[i + 1];
         }
-        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
         if (predicted_index < 0)
         {
             predicted_index = 0;
@@ -352,7 +354,7 @@ void ZM::point_query(ExpRecorder &exp_recorder, Point query_point)
             exp_recorder.page_access += 1;
             if (iter != leafnode->children->end())
             {
-                // cout << "find it" << endl;
+                //cout << "find it" << endl;
                 break;
             }
         }
@@ -391,7 +393,8 @@ void ZM::point_query_after_update(ExpRecorder &exp_recorder, Point query_point)
         {
             next_stage_length = stages[i + 1];
         }
-        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
         if (predicted_index < 0)
         {
             predicted_index = 0;
@@ -430,9 +433,9 @@ void ZM::point_query(ExpRecorder &exp_recorder, vector<Point> query_points)
     }
     auto finish = chrono::high_resolution_clock::now();
     exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count() / query_points.size();
-    cout << "finish point_query: pageaccess:" << exp_recorder.page_access << endl;
+    //cout << "finish point_query: pageaccess:" << exp_recorder.page_access << endl;
     exp_recorder.page_access = exp_recorder.page_access / query_points.size();
-    cout << "finish point_query time: " << exp_recorder.time << endl;
+    //cout << "finish point_query time: " << exp_recorder.time << endl;
 }
 
 void ZM::point_query_after_update(ExpRecorder &exp_recorder, vector<Point> query_points)
@@ -445,7 +448,7 @@ void ZM::point_query_after_update(ExpRecorder &exp_recorder, vector<Point> query
     auto finish = chrono::high_resolution_clock::now();
     exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count() / query_points.size();
     exp_recorder.page_access = (double)exp_recorder.page_access / query_points.size();
-    cout<< "point_query_after_update time: " << exp_recorder.time << endl;
+    //cout<< "point_query_after_update time: " << exp_recorder.time << endl;
 }
 
 long long ZM::get_point_index(ExpRecorder &exp_recorder, Point query_point)
@@ -470,7 +473,15 @@ long long ZM::get_point_index(ExpRecorder &exp_recorder, Point query_point)
         {
             next_stage_length = stages[i + 1];
         }
-        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+
+        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length; // <====== origin but not collect
+        /*
+        torch::Tensor res = index[i][predicted_index]->my_forward(torch::tensor({key})); // <========== use torch ,collect but very slow
+        predicted_index = (int)(res.item().toFloat() * next_stage_length);
+        */
+
+        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length; // <=== predict sinplely
+
         if (predicted_index < 0)
         {
             predicted_index = 0;
@@ -490,11 +501,16 @@ vector<Point> ZM::window_query(ExpRecorder &exp_recorder, Mbr query_window)
     vector<Point> window_query_results;
     vector<Point> vertexes = query_window.get_corner_points();
     vector<long long> indices;
+    //cout << "-----mbr-----" << endl;
     for (Point point : vertexes)
     {
-        get_point_index(exp_recorder, point);
+        long long predicted_index = 0;
+        //cout << "x: " << point.x << " y: " << point.y << endl;
+        predicted_index = get_point_index(exp_recorder, point);
+        //cout << "predicted_index: " << predicted_index << endl;
         indices.push_back(exp_recorder.index_low);
         indices.push_back(exp_recorder.index_high);
+        //cout << "low: " << exp_recorder.index_low << " high: " << exp_recorder.index_high << endl;
     }
     sort(indices.begin(), indices.end());
     long front = indices.front() / page_size;
@@ -502,7 +518,8 @@ vector<Point> ZM::window_query(ExpRecorder &exp_recorder, Mbr query_window)
 
     front = front < 0 ? 0 : front;
     back = back >= leafnodes.size() ? leafnodes.size() - 1 : back;
-    // cout << "front: " << front << " back: " << back << endl;
+    
+    //cout << "front: " << front << " back: " << back << endl;
     for (size_t i = front; i <= back; i++)
     {
         LeafNode *leafnode = leafnodes[i];
@@ -518,7 +535,7 @@ vector<Point> ZM::window_query(ExpRecorder &exp_recorder, Mbr query_window)
             }
         }
     }
-    // cout<< window_query_results.size() <<endl;
+    //cout<< window_query_results.size() <<endl;
     return window_query_results;
 }
 
@@ -526,14 +543,18 @@ void ZM::window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows)
 {
     cout << "ZM::window_query" << endl;
     auto start = chrono::high_resolution_clock::now();
+    //ofstream outputfile("window_query_results_size.txt");
     for (int i = 0; i < query_windows.size(); i++)
     {
         vector<Point> window_query_results = window_query(exp_recorder, query_windows[i]);
         exp_recorder.window_query_result_size += window_query_results.size();
+        //outputfile << window_query_results.size() << endl;
     }
+    //outputfile.close();
     auto finish = chrono::high_resolution_clock::now();
     exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count() / query_windows.size();
     exp_recorder.page_access = (double)exp_recorder.page_access / query_windows.size();
+
 }
 
 vector<Point> ZM::acc_window_query(ExpRecorder &exp_recorder, Mbr query_window)
@@ -686,8 +707,8 @@ void ZM::insert(ExpRecorder &exp_recorder, Point point)
         {
             next_stage_length = stages[i + 1];
         }
-        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
-
+        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
         net = &index[i][predicted_index];
         // predicted_index = net->forward(torch::tensor({key})).item().toFloat() * next_stage_length;
         if (predicted_index < 0)
@@ -731,8 +752,9 @@ void ZM::insert(ExpRecorder &exp_recorder, vector<Point> points)
     auto finish = chrono::high_resolution_clock::now();
     long long old_time_cost = exp_recorder.insert_time * exp_recorder.insert_num;
     exp_recorder.insert_num += points.size();
-    exp_recorder.insert_time = (old_time_cost + chrono::duration_cast<chrono::nanoseconds>(finish - start).count()) / exp_recorder.insert_num;
-    cout<< "exp_recorder.insert_time: " << exp_recorder.insert_time << endl;
+    //exp_recorder.insert_time = (old_time_cost + chrono::duration_cast<chrono::nanoseconds>(finish - start).count()) / exp_recorder.insert_num;
+    //cout<< "insert_time: " << exp_recorder.insert_time << endl;
+    exp_recorder.insert_time = (chrono::duration_cast<chrono::nanoseconds>(finish - start).count()) / exp_recorder.insert_num;
 }
 
 void ZM::remove(ExpRecorder &exp_recorder, Point point)
@@ -755,7 +777,8 @@ void ZM::remove(ExpRecorder &exp_recorder, Point point)
         {
             next_stage_length = stages[i + 1];
         }
-        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
         if (predicted_index < 0)
         {
             predicted_index = 0;

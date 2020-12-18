@@ -114,6 +114,7 @@ public:
         torch::Tensor p2 = this->parameters()[1];
         torch::Tensor p3 = this->parameters()[2];
         torch::Tensor p4 = this->parameters()[3];
+        //width = p1.sizes()[0];
         p1 = p1.reshape({2 * width, 1});
         for (size_t i = 0; i < width; i++)
         {
@@ -155,7 +156,27 @@ public:
         }
         cout<< endl;
     }
-
+    void print_ZM_parameters()
+    {
+        cout << "w1_" << endl;
+        for (size_t i = 0; i < width; i++)
+        {
+            cout<< w1_[i] << endl;
+        }
+        cout << "b1" << endl;
+        for (size_t i = 0; i < width; i++)
+        {
+            cout<< b1[i] << endl;
+        }
+        cout << "p2" << endl;
+        for (size_t i = 0; i < width; i++)
+        {
+            cout<< w2[i] << " " ;
+        }
+        cout << endl;
+        cout << "b2" << endl;
+        cout << b2 << endl;
+    }
     torch::Tensor forward(torch::Tensor x)
     {
         // Use one of many tensor manipulation functions.
@@ -170,6 +191,17 @@ public:
         // return fc2->forward(fc1->forward(x));
     }
 
+    torch::Tensor my_forward(torch::Tensor x)
+    {
+        cout << "x = torch::relu(fc1->forward(x));" << endl;
+        x = torch::relu(fc1->forward(x));
+        cout << x << endl;
+        x = fc2->forward(x);
+        cout << x << endl;
+        return x;
+    }
+
+
     torch::Tensor predict(torch::Tensor x)
     {
         x = torch::relu(fc1->forward(x));
@@ -177,17 +209,31 @@ public:
         return x;
     }
 
-    // float predictZM(float key)
-    // {
-    //     float result;
-    //     for (size_t i = 0; i < Constants::HIDDEN_LAYER_WIDTH; i++)
-    //     {
-    //         result += activation(key * w1_[i] + b1[i]) * w2[i];
-    //     }
-    //     result += b2;
-    //     return result;
-    // }
-
+    float predictZM(float key)
+    {
+         float result = 0;
+         for (size_t i = 0; i < Constants::HIDDEN_LAYER_WIDTH; i++)
+         {
+             result += activation(key * w1_[i] + b1[i]) * w2[i];
+         }
+         result += b2;
+         return result;
+    }
+    float my_predictZM(float key)
+    {
+         float result = 0;
+         float tmp;
+         cout << "my_predictZM" << endl;
+         for (size_t i = 0; i < Constants::HIDDEN_LAYER_WIDTH; i++)
+         {
+             tmp = activation(key * w1_[i] + b1[i]);
+             result += tmp * w2[i];
+             cout << tmp << " , w2[i]: " << w2[i] << " , tmp*w2[i]: " << tmp*w2[i] << " , result: " << result << endl;
+         }
+         result += b2;
+         cout << result << ", b2: " << b2 << endl;
+         return result;
+    }
     float predict_ZM(float key)
     {
         int blocks = width / 4;
@@ -200,7 +246,7 @@ public:
         // _mm_load1_ps
         fLoad0_x = _mm_set_ps(key, key, key, key);
         fLoad0_zeros = _mm_set_ps(0, 0, 0, 0);
-        float result;
+        float result = 0;
         for (int i = 0; i < blocks; i++)
         {
             // TODO change w1

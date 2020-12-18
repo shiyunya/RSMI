@@ -16,9 +16,9 @@ ifeq ($(TYPE), GPU)
 	LIB +=-L/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch_gpu/lib -ltorch -lc10 -lpthread
 	FLAG = -Wl,-rpath=/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.7.0+cpu/libtorch_gpu/lib
 else
-	INCLUDE = -I/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/include -I/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/include/torch/csrc/api/include -I/mnt/d/boost_1_73_0
-	LIB +=-L/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/lib -ltorch -lc10 -lpthread
-	FLAG = -Wl,-rpath=/mnt/d/libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/lib
+	INCLUDE = -I ../libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/include -I ../libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/include/torch/csrc/api/include -I ../boost_1_73_0
+	LIB += -L ../libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/lib -ltorch -lc10 -lpthread
+	FLAG = -Wl,-rpath=../libtorch-cxx11-abi-shared-with-deps-1.4.0+cpu/libtorch/lib
 endif
 
 

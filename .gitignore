@@ -5,3 +5,5 @@ Exp
 *.sh
 files/*
 datasets/*
+Pipfile
+Pipfile.lock

@@ -103,6 +103,7 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
     auto start = chrono::high_resolution_clock::now();
     if (points.size() <= exp_recorder.N)
     {
+        //cout << "leaf model" << endl;
         this->model_path += "_" + to_string(level) + "_" + to_string(index);
         if (exp_recorder.depth < level)
         {
@@ -185,6 +186,7 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
         else
         {
             torch::load(net, this->model_path);
+            net->width = net->parameters()[0].sizes()[0];
         }
         net->get_parameters();
 
@@ -224,6 +226,7 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
     }
     else
     {
+        //cout << "not leaf model" << endl;
         is_last = false;
         N = (long long)points.size();
         int bit_num = max_partition_num;
