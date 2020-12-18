@@ -117,6 +117,7 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     exp_recorder.clean();
 }
 
+
 void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> points, map<string, vector<Mbr>> mbrs_map, vector<Point> query_poitns, vector<Point> insert_points, string model_path)
 {
     exp_recorder.clean();
@@ -125,7 +126,7 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     ZM *partition = new ZM();
     auto start = chrono::high_resolution_clock::now();
     //partition->model_path = model_path;
-    cout << "build start" << endl;
+    cout << "building ZM" << endl;
     partition->build(exp_recorder, points);
     auto finish = chrono::high_resolution_clock::now();
     exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
@@ -142,13 +143,13 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     exp_recorder.window_size = areas[2];
     exp_recorder.window_ratio = ratios[2];
     partition->acc_window_query(exp_recorder, mbrs_map[to_string(areas[2]) + to_string(ratios[2])]);
-    cout << "acc_window_query_qesult_size," << exp_recorder.acc_window_query_qesult_size;
+    cout << "acc_window_query_qesult_size," << exp_recorder.acc_window_query_qesult_size << endl;
     cout << "acc_window_query time," << exp_recorder.time << endl;
     cout << "acc_window_query page_access," << exp_recorder.page_access << endl;
     file_writer.write_acc_window_query(exp_recorder);
     partition->window_query(exp_recorder, mbrs_map[to_string(areas[2]) + to_string(ratios[2])]);
     exp_recorder.accuracy = ((double)exp_recorder.window_query_result_size) / exp_recorder.acc_window_query_qesult_size;
-    cout << "window_query_qesult_size," << exp_recorder.window_query_result_size;
+    cout << "window_query_qesult_size," << exp_recorder.window_query_result_size << endl;
     cout << "window_query time," << exp_recorder.time << endl;
     cout << "window_query page_access," << exp_recorder.page_access << endl;
     cout<< "window_query accuracy," << exp_recorder.accuracy << endl;
@@ -157,12 +158,12 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     exp_recorder.clean();
     exp_recorder.k_num = ks[2];
     partition->acc_kNN_query(exp_recorder, query_poitns, ks[2]);
-    cout << "acc_knn_query_results.size," << exp_recorder.acc_knn_query_results.size();
+    cout << "acc_knn_query_results.size," << exp_recorder.acc_knn_query_results.size() << endl;
     cout << "acc_kNN_query time," << exp_recorder.time << endl;
     cout << "acc_kNN_query page_access," << exp_recorder.page_access << endl;
     file_writer.write_acc_kNN_query(exp_recorder);
     partition->kNN_query(exp_recorder, query_poitns, ks[2]);
-    cout << "knn_query_results.size," << exp_recorder.knn_query_results.size();
+    cout << "knn_query_results.size," << exp_recorder.knn_query_results.size() << endl;
     cout << "kNN_query time," << exp_recorder.time << endl;
     cout << "kNN_query page_access," << exp_recorder.page_access << endl;
     exp_recorder.accuracy = knn_diff(exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
