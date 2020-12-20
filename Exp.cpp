@@ -63,16 +63,19 @@ double knn_diff(vector<Point> acc, vector<Point> pred)
 double my_knn_diff(vector<vector<Point>> acc, vector<vector<Point>> pred)
 {
     int num = 0;
+    int all = 0;
     for(int i = 0 ; i < pred.size() ; i++){
+        all += pred[i].size();
         for(Point pred_point : pred[i]){
             for(Point acc_point : acc[i]){
-                if (pred_point.x == acc_point.x && pred_point.y == acc_point.y)
+                if (pred_point.x == acc_point.x && pred_point.y == acc_point.y){
                     num++;
                     break;
+                }
             }
         }
     }
-    return num * 1.0 / pred.size();
+    return num * 1.0 / all;
 }
 
 void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> points, map<string, vector<Mbr>> mbrs_map, vector<Point> query_poitns, vector<Point> insert_points, string model_path)
