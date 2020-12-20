@@ -601,7 +601,9 @@ void ZM::kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k)
         vector<Point> knn_result = kNN_query(exp_recorder, query_points[i], k);
         auto finish = chrono::high_resolution_clock::now();
         exp_recorder.time += chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
-        exp_recorder.knn_query_results.insert(exp_recorder.knn_query_results.end(), knn_result.begin(), knn_result.end());
+        //exp_recorder.knn_query_results.insert(exp_recorder.knn_query_results.end(), knn_result.begin(), knn_result.end());
+        exp_recorder.knn_query_results.push_back(knn_result);
+        
         // cout << "knn_diff: " << knn_diff(acc_kNN_query(exp_recorder, query_points[i], k), kNN_query(exp_recorder, query_points[i], k)) << endl;
     }
     exp_recorder.time /= query_points.size();
@@ -646,7 +648,9 @@ void ZM::acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, in
         vector<Point> knn_result = acc_kNN_query(exp_recorder, query_points[i], k);
         auto finish = chrono::high_resolution_clock::now();
         exp_recorder.time += chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
-        exp_recorder.acc_knn_query_results.insert(exp_recorder.acc_knn_query_results.end(), knn_result.begin(), knn_result.end());
+        //exp_recorder.acc_knn_query_results.insert(exp_recorder.acc_knn_query_results.end(), knn_result.begin(), knn_result.end());
+        exp_recorder.acc_knn_query_results.push_back(knn_result);
+    
     }
     exp_recorder.time /= query_points.size();
     exp_recorder.k_num = k;
