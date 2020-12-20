@@ -58,8 +58,8 @@ public:
 
     int window_query_result_size;
     int acc_window_query_qesult_size;
-    vector<Point> knn_query_results;
-    vector<Point> acc_knn_query_results;
+    vector<vector<Point>> knn_query_results;
+    vector<vector<Point>> acc_knn_query_results;
 
     vector<Point> window_query_results;
     ExpRecorder();

@@ -60,6 +60,20 @@ double knn_diff(vector<Point> acc, vector<Point> pred)
     return num * 1.0 / pred.size();
 }
 
+double my_knn_diff(vector<vector<Point>> acc, vector<vector<Point>> pred)
+{
+    int num = 0;
+    for(int i = 0 ; i < pred.size() ; i++){
+        for(Point pred_point : pred[i]){
+            for(Point acc_point : acc[i]){
+                if (pred_point.x == acc_point.x && pred_point.y == acc_point.y)
+                    num++;
+                    break;
+            }
+        }
+    }
+    return num * 1.0 / pred.size();
+}
 
 void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> points, map<string, vector<Mbr>> mbrs_map, vector<Point> query_poitns, vector<Point> insert_points, string model_path)
 {
@@ -105,7 +119,7 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     partition->kNN_query(exp_recorder, query_poitns, ks[2]);
     cout << "kNN_query time , " << exp_recorder.time << endl;
     cout << "kNN_query page_access , " << exp_recorder.page_access << endl;
-    exp_recorder.accuracy = knn_diff(exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
+    exp_recorder.accuracy = my_knn_diff(exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
     cout<< "kNN_query accuracy , " << exp_recorder.accuracy << endl;
     file_writer.write_kNN_query(exp_recorder);
     exp_recorder.clean();
@@ -167,7 +181,7 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     cout << "knn_query_results.size," << exp_recorder.knn_query_results.size() << endl;
     cout << "kNN_query time," << exp_recorder.time << endl;
     cout << "kNN_query page_access," << exp_recorder.page_access << endl;
-    exp_recorder.accuracy = knn_diff(exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
+    exp_recorder.accuracy = my_knn_diff(exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
     cout<< "kNN_query accuracy," << exp_recorder.accuracy << endl;
     file_writer.write_kNN_query(exp_recorder);
     exp_recorder.clean();

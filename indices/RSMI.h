@@ -809,7 +809,8 @@ void RSMI::kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int 
         auto finish = chrono::high_resolution_clock::now();
         long long temp_time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
         exp_recorder.time += temp_time;
-        exp_recorder.knn_query_results.insert(exp_recorder.knn_query_results.end(), knnresult.begin(), knnresult.end());
+        //exp_recorder.knn_query_results.insert(exp_recorder.knn_query_results.end(), knnresult.begin(), knnresult.end());
+        exp_recorder.knn_query_results.push_back(knnresult);
     }
     exp_recorder.time /= length;
     exp_recorder.page_access = (double)exp_recorder.page_access / length;
@@ -882,7 +883,9 @@ void RSMI::acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, 
         vector<Point> knnresult = acc_kNN_query(exp_recorder, query_points[i], k);
         auto finish = chrono::high_resolution_clock::now();
         exp_recorder.time += chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
-        exp_recorder.acc_knn_query_results.insert(exp_recorder.acc_knn_query_results.end(), knnresult.begin(), knnresult.end());
+        //exp_recorder.acc_knn_query_results.insert(exp_recorder.acc_knn_query_results.end(), knnresult.begin(), knnresult.end());
+        exp_recorder.acc_knn_query_results.push_back(knnresult);
+    
     }
     exp_recorder.time /= length;
     exp_recorder.k_num = k;
