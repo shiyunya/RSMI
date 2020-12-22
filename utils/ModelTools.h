@@ -201,7 +201,6 @@ public:
         return x;
     }
 
-
     torch::Tensor predict(torch::Tensor x)
     {
         x = torch::relu(fc1->forward(x));
@@ -219,6 +218,7 @@ public:
          result += b2;
          return result;
     }
+
     float my_predictZM(float key)
     {
          float result = 0;

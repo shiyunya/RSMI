@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include <getopt.h>
 
+#include <omp.h>//limits thread
+
 using namespace std;
 
 #ifndef use_gpu
