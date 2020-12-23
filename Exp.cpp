@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <getopt.h>
 
-#include <omp.h>//limits thread
+//#include <omp.h>//limits thread
 
 using namespace std;
 
@@ -92,13 +92,13 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     partition->build(exp_recorder, points);
     auto finish = chrono::high_resolution_clock::now();
     exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
-    cout << "build time: " << exp_recorder.time << endl;
+    cout << "build time , " << exp_recorder.time << endl;
     exp_recorder.size = (2 * Constants::HIDDEN_LAYER_WIDTH + Constants::HIDDEN_LAYER_WIDTH * 1 + Constants::HIDDEN_LAYER_WIDTH * 1 + 1) * Constants::EACH_DIM_LENGTH * exp_recorder.non_leaf_node_num + (Constants::DIM * Constants::PAGESIZE + Constants::PAGESIZE + Constants::DIM * Constants::DIM) * Constants::EACH_DIM_LENGTH * exp_recorder.leaf_node_num;
     file_writer.write_build(exp_recorder);
     exp_recorder.clean();
     partition->point_query(exp_recorder, points);
-    cout << "finish point_query: pageaccess:" << exp_recorder.page_access << endl;
-    cout << "finish point_query time: " << exp_recorder.time << endl;
+    cout << "point_query pageaccess , " << exp_recorder.page_access << endl;
+    cout << "point_query time , " << exp_recorder.time << endl;
     file_writer.write_point_query(exp_recorder);
     exp_recorder.clean();
 
@@ -150,53 +150,53 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     partition->build(exp_recorder, points);
     auto finish = chrono::high_resolution_clock::now();
     exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
-    cout << "build time," << exp_recorder.time << endl;
+    cout << "build time , " << exp_recorder.time << endl;
     exp_recorder.size = (2 * Constants::HIDDEN_LAYER_WIDTH + Constants::HIDDEN_LAYER_WIDTH * 1 + Constants::HIDDEN_LAYER_WIDTH * 1 + 1) * Constants::EACH_DIM_LENGTH * exp_recorder.non_leaf_node_num + (Constants::DIM * Constants::PAGESIZE + Constants::PAGESIZE + Constants::DIM * Constants::DIM) * Constants::EACH_DIM_LENGTH * exp_recorder.leaf_node_num;
     file_writer.write_build(exp_recorder);
     exp_recorder.clean();
     partition->point_query(exp_recorder, points);
-    cout << "point_query time," << exp_recorder.time << endl;
-    cout << "point_query pageaccess," << exp_recorder.page_access << endl;
+    cout << "point_query time , " << exp_recorder.time << endl;
+    cout << "point_query pageaccess , " << exp_recorder.page_access << endl;
     file_writer.write_point_query(exp_recorder);
     exp_recorder.clean();
 
     exp_recorder.window_size = areas[2];
     exp_recorder.window_ratio = ratios[2];
     partition->acc_window_query(exp_recorder, mbrs_map[to_string(areas[2]) + to_string(ratios[2])]);
-    cout << "acc_window_query_qesult_size," << exp_recorder.acc_window_query_qesult_size << endl;
-    cout << "acc_window_query time," << exp_recorder.time << endl;
-    cout << "acc_window_query page_access," << exp_recorder.page_access << endl;
+    //cout << "acc_window_query_qesult_size , " << exp_recorder.acc_window_query_qesult_size << endl;
+    cout << "acc_window_query time , " << exp_recorder.time << endl;
+    cout << "acc_window_query page_access , " << exp_recorder.page_access << endl;
     file_writer.write_acc_window_query(exp_recorder);
     partition->window_query(exp_recorder, mbrs_map[to_string(areas[2]) + to_string(ratios[2])]);
     exp_recorder.accuracy = ((double)exp_recorder.window_query_result_size) / exp_recorder.acc_window_query_qesult_size;
-    cout << "window_query_qesult_size," << exp_recorder.window_query_result_size << endl;
-    cout << "window_query time," << exp_recorder.time << endl;
-    cout << "window_query page_access," << exp_recorder.page_access << endl;
-    cout<< "window_query accuracy," << exp_recorder.accuracy << endl;
+    //cout << "window_query_qesult_size , " << exp_recorder.window_query_result_size << endl;
+    cout << "window_query time , " << exp_recorder.time << endl;
+    cout << "window_query page_access , " << exp_recorder.page_access << endl;
+    cout<< "window_query accuracy , " << exp_recorder.accuracy << endl;
     file_writer.write_window_query(exp_recorder);
 
     exp_recorder.clean();
     exp_recorder.k_num = ks[2];
     partition->acc_kNN_query(exp_recorder, query_poitns, ks[2]);
-    cout << "acc_knn_query_results.size," << exp_recorder.acc_knn_query_results.size() << endl;
-    cout << "acc_kNN_query time," << exp_recorder.time << endl;
-    cout << "acc_kNN_query page_access," << exp_recorder.page_access << endl;
+    //cout << "acc_knn_query_results.size , " << exp_recorder.acc_knn_query_results.size() << endl;
+    cout << "acc_kNN_query time , " << exp_recorder.time << endl;
+    cout << "acc_kNN_query page_access , " << exp_recorder.page_access << endl;
     file_writer.write_acc_kNN_query(exp_recorder);
     partition->kNN_query(exp_recorder, query_poitns, ks[2]);
-    cout << "knn_query_results.size," << exp_recorder.knn_query_results.size() << endl;
-    cout << "kNN_query time," << exp_recorder.time << endl;
-    cout << "kNN_query page_access," << exp_recorder.page_access << endl;
+    //cout << "knn_query_results.size," << exp_recorder.knn_query_results.size() << endl;
+    cout << "kNN_query time , " << exp_recorder.time << endl;
+    cout << "kNN_query page_access , " << exp_recorder.page_access << endl;
     exp_recorder.accuracy = my_knn_diff(exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
-    cout<< "kNN_query accuracy," << exp_recorder.accuracy << endl;
+    cout<< "kNN_query accuracy , " << exp_recorder.accuracy << endl;
     file_writer.write_kNN_query(exp_recorder);
     exp_recorder.clean();
 
     partition->insert(exp_recorder, insert_points);
-    cout << "insert time," << exp_recorder.insert_time << endl;
+    cout << "insert time , " << exp_recorder.insert_time << endl;
     exp_recorder.clean();
     partition->point_query_after_update(exp_recorder, points);
-    cout << "point_query_after_update time," << exp_recorder.time << endl;
-    cout << "point_query_after_update pageaccess," << exp_recorder.page_access << endl;
+    cout << "point_query_after_update time , " << exp_recorder.time << endl;
+    cout << "point_query_after_update pageaccess , " << exp_recorder.page_access << endl;
     exp_recorder.clean();
 }
 
