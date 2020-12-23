@@ -77,6 +77,9 @@ public:
     void point_query(ExpRecorder &exp_recorder, vector<Point> query_points);
     void point_query_after_update(ExpRecorder &exp_recorder, vector<Point> query_points);
 
+    void point_query_biased(ExpRecorder &exp_recorder, Point query_point);
+    void point_query_biased(ExpRecorder &exp_recorder, vector<Point> query_points);
+
     void window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows);
     vector<Point> window_query(ExpRecorder &exp_recorder, Mbr query_window);
     void acc_window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows);
@@ -423,6 +426,73 @@ void ZM::point_query_after_update(ExpRecorder &exp_recorder, Point query_point)
     }
 }
 
+void ZM::point_query_biased(ExpRecorder &exp_recorder, Point query_point)
+{
+    long long curve_val = compute_Z_value(query_point.x * N, query_point.y * N, bit_num);
+    float key = (curve_val - min_curve_val) * 1.0 / gap;
+    int predicted_index = 0;
+    int next_stage_length = 1;
+    int min_error = 0;
+    int max_error = 0;
+    for (int i = 0; i < stages.size(); i++)
+    {
+        if (i == stages.size() - 1)
+        {
+            next_stage_length = N;
+            min_error = index[i][predicted_index]->min_error;
+            max_error = index[i][predicted_index]->max_error;
+        }
+        else
+        {
+            next_stage_length = stages[i + 1];
+        }
+        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
+        if (predicted_index < 0)
+        {
+            predicted_index = 0;
+        }
+        if (predicted_index >= next_stage_length)
+        {
+            predicted_index = next_stage_length - 1;
+        }
+    }
+    int front = predicted_index + min_error;
+    front = front < 0 ? 0 : front;
+    int back = predicted_index + max_error;
+    back = back >= N ? N - 1 : back;
+    int mid = predicted_index;
+    while (front <= back)
+    {
+        int node_index = mid / Constants::PAGESIZE;
+        LeafNode *leafnode = leafnodes[node_index];
+
+        if(leafnode->mbr.contains(query_point))
+        {
+            vector<Point>::iterator iter = find(leafnode->children->begin(), leafnode->children->end(), query_point);
+            exp_recorder.page_access += 1;
+            if (iter != leafnode->children->end())
+            {
+                //cout << "find it" << endl;
+                break;
+            }
+        }
+        if ((*leafnode->children)[0].curve_val < curve_val)
+        {
+            front = mid + 1;
+        }
+        else
+        {
+            back = mid - 1;
+        }
+        mid = (front + back) / 2;
+        if (front > back)
+        {
+            //cout << "not found!" << endl;
+        }
+    }
+}
+
 void ZM::point_query(ExpRecorder &exp_recorder, vector<Point> query_points)
 {
     cout << "point_query:" << query_points.size() << endl;
@@ -436,6 +506,19 @@ void ZM::point_query(ExpRecorder &exp_recorder, vector<Point> query_points)
     //cout << "finish point_query: pageaccess:" << exp_recorder.page_access << endl;
     exp_recorder.page_access = exp_recorder.page_access / query_points.size();
     //cout << "finish point_query time: " << exp_recorder.time << endl;
+}
+
+void ZM::point_query_biased(ExpRecorder &exp_recorder, vector<Point> query_points)
+{
+    cout << "point_query_biased:" << query_points.size() << endl;
+    auto start = chrono::high_resolution_clock::now();
+    for (long i = 0; i < query_points.size(); i++)
+    {
+        point_query_biased(exp_recorder, query_points[i]);
+    }
+    auto finish = chrono::high_resolution_clock::now();
+    exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count() / query_points.size();
+    exp_recorder.page_access = exp_recorder.page_access / query_points.size();
 }
 
 void ZM::point_query_after_update(ExpRecorder &exp_recorder, vector<Point> query_points)

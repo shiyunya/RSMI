@@ -158,8 +158,13 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     cout << "point_query time , " << exp_recorder.time << endl;
     cout << "point_query pageaccess , " << exp_recorder.page_access << endl;
     file_writer.write_point_query(exp_recorder);
-    exp_recorder.clean();
 
+    exp_recorder.clean();
+    partition->point_query_biased(exp_recorder, points);
+    cout << "point_query_biased time , " << exp_recorder.time << endl;
+    cout << "point_query_biased pageaccess , " << exp_recorder.page_access << endl;
+
+    exp_recorder.clean();
     exp_recorder.window_size = areas[2];
     exp_recorder.window_ratio = ratios[2];
     partition->acc_window_query(exp_recorder, mbrs_map[to_string(areas[2]) + to_string(ratios[2])]);
