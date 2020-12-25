@@ -50,8 +50,11 @@ private:
     long long gap;
     long long min_curve_val;
     long long max_curve_val;
-
+    
 public:
+    string model_path;
+    string model_path_root;
+    
     ZM();
     ZM(int);
 
@@ -207,6 +210,7 @@ void ZM::build(ExpRecorder &exp_recorder, vector<Point> points)
         // build
         for (size_t j = 0; j < stages[i]; j++)
         {
+            model_path = model_path_root + "_" + to_string(i) + "_" + to_string(j);
             auto net = std::make_shared<Net>(1);
             #ifdef use_gpu
                 net->to(torch::kCUDA);
@@ -220,12 +224,20 @@ void ZM::build(ExpRecorder &exp_recorder, vector<Point> points)
             {
                 vector<float> locations;
                 vector<float> labels;
-                for (Point point : tmp_records[i][j])
-                {
-                    locations.push_back(point.normalized_curve_val);
-                    labels.push_back(point.index);
+                
+                std::ifstream fin(this->model_path);
+                if (!fin){
+                    for (Point point : tmp_records[i][j]){
+                        locations.push_back(point.normalized_curve_val);
+                        labels.push_back(point.index);
+                    }
+                    net->train_model(locations, labels);
+                    torch::save(net, this->model_path);
                 }
-                net->train_model(locations, labels);
+                else{
+                    torch::load(net, this->model_path);
+                    net->width = net->parameters()[0].sizes()[0];
+                }
                 net->get_parameters_ZM();
                 // net->trainModel(tmp_records[i][j]);
                 exp_recorder.non_leaf_node_num++;

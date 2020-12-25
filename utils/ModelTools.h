@@ -37,7 +37,6 @@ public:
     int max_error = 0;
     int min_error = 0;
     int width = 0;
-
     float learning_rate = Constants::LEARNING_RATE;
 
     float w1[Constants::HIDDEN_LAYER_WIDTH * 2];

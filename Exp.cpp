@@ -145,7 +145,7 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     //ZM::model_path_root = model_path;
     ZM *partition = new ZM();
     auto start = chrono::high_resolution_clock::now();
-    //partition->model_path = model_path;
+    partition->model_path_root = model_path;
     cout << "building ZM" << endl;
     partition->build(exp_recorder, points);
     auto finish = chrono::high_resolution_clock::now();
@@ -292,9 +292,15 @@ int main(int argc, char **argv)
             mbrs_map.insert(pair<string, vector<Mbr>>(to_string(areas[i]) + to_string(ratios[j]), mbrs));
         }
     }
-    string model_root_path = Constants::TORCH_MODELS + distribution + "_" + to_string(cardinality);
+    string model_root_path;
+    if(zm_flag){
+        model_root_path = Constants::TORCH_MODELS + "ZM_" + distribution + "_" + to_string(cardinality);
+    }else{
+        model_root_path = Constants::TORCH_MODELS + "RSMI_" + distribution + "_" + to_string(cardinality);
+    }
     file_utils::check_dir(model_root_path);
     string model_path = model_root_path + "/";
+
     FileWriter file_writer(Constants::RECORDS);
     if(zm_flag){
         exp_ZM(file_writer, exp_recorder, points, mbrs_map, query_poitns, insert_points, model_path);

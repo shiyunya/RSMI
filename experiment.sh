@@ -1,4 +1,6 @@
 #!/bin/sh
+
+# nohup ./experiment.sh &
 for c in 100000 1000000 10000000
 do
     for d in uniform normal skewed
