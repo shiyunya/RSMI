@@ -2,8 +2,9 @@
 *.o
 torch_models/*
 Exp
-*.sh
+#*.sh
 files/*
 datasets/*
 Pipfile
 Pipfile.lock
+*.out
