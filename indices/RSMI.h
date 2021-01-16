@@ -229,7 +229,10 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
         //cout << "not leaf model" << endl;
         is_last = false;
         N = (long long)points.size();
-        int bit_num = max_partition_num;
+        
+        int bit_num = pow(2,floor(log(N * 1.0 / page_size) / log(4)));//max_partition_num;
+        bit_num = bit_num > max_partition_num ? max_partition_num : bit_num;
+
         int partition_size = ceil(points.size() * 1.0 / pow(bit_num, 2));
         sort(points.begin(), points.end(), sortX());
         long long side = pow(bit_num, 2);
