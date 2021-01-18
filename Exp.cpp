@@ -86,8 +86,8 @@ double calclate_accuracy(vector<vector<Point>> acc, vector<vector<Point>> pred)
     int all = 0;
     for(int i = 0 ; i < pred.size() ; i++){
         all += pred[i].size();
-        for(Point pred_point : pred[i]){
-            for(Point acc_point : acc[i]){
+        for(Point acc_point : acc[i]){
+            for(Point pred_point : pred[i]){
                 if (pred_point.x == acc_point.x && pred_point.y == acc_point.y){
                     num++;
                     break;
