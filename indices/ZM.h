@@ -636,8 +636,9 @@ void ZM::window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows)
     //ofstream outputfile("window_query_results_size.txt");
     for (int i = 0; i < query_windows.size(); i++)
     {
-        vector<Point> window_query_results = window_query(exp_recorder, query_windows[i]);
-        exp_recorder.window_query_result_size += window_query_results.size();
+        vector<Point> window_query_result = window_query(exp_recorder, query_windows[i]);
+        exp_recorder.window_query_result_size += window_query_result.size();
+        exp_recorder.window_query_results.push_back(window_query_result);
         //outputfile << window_query_results.size() << endl;
     }
     //outputfile.close();
@@ -674,7 +675,9 @@ void ZM::acc_window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows)
     auto start = chrono::high_resolution_clock::now();
     for (int i = 0; i < query_windows.size(); i++)
     {
-        exp_recorder.acc_window_query_qesult_size += acc_window_query(exp_recorder, query_windows[i]).size();
+        vector<Point> acc_window_query_result = acc_window_query(exp_recorder, query_windows[i]);
+        exp_recorder.acc_window_query_qesult_size += acc_window_query_result.size();
+        exp_recorder.acc_window_query_results.push_back(acc_window_query_result);
     }
     auto finish = chrono::high_resolution_clock::now();
     // cout << "end:" << end.tv_nsec << " begin" << begin.tv_nsec << endl;

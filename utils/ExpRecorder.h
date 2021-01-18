@@ -61,7 +61,9 @@ public:
     vector<vector<Point>> knn_query_results;
     vector<vector<Point>> acc_knn_query_results;
 
-    vector<Point> window_query_results;
+    vector<Point> window_query_result;
+    vector<vector<Point>> window_query_results;
+    vector<vector<Point>> acc_window_query_results;
     ExpRecorder();
     string get_time();
     string get_time_pageaccess();
