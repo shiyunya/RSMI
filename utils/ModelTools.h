@@ -91,18 +91,22 @@ public:
         for (size_t i = 0; i < width; i++)
         {
             w1_[i] = p1.select(0, i).item().toFloat();
+            w1__[i] = p1.select(0, i).item().toFloat();
+        
         }
 
         p2 = p2.reshape({width, 1});
         for (size_t i = 0; i < width; i++)
         {
             b1[i] = p2.select(0, i).item().toFloat();
+            b1_[i] = p2.select(0, i).item().toFloat();
         }
 
         p3 = p3.reshape({width, 1});
         for (size_t i = 0; i < width; i++)
         {
             w2[i] = p3.select(0, i).item().toFloat();
+            w2_[i] = p3.select(0, i).item().toFloat();
         }
         b2 = p4.item().toFloat();
     }

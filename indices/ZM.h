@@ -340,8 +340,8 @@ void ZM::point_query(ExpRecorder &exp_recorder, Point query_point)
         {
             next_stage_length = stages[i + 1];
         }
-        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
-        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
+        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        //predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
         if (predicted_index < 0)
         {
             predicted_index = 0;
@@ -408,8 +408,8 @@ void ZM::point_query_after_update(ExpRecorder &exp_recorder, Point query_point)
         {
             next_stage_length = stages[i + 1];
         }
-        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
-        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
+        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        //predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
         if (predicted_index < 0)
         {
             predicted_index = 0;
@@ -458,8 +458,8 @@ void ZM::point_query_biased(ExpRecorder &exp_recorder, Point query_point)
         {
             next_stage_length = stages[i + 1];
         }
-        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
-        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
+        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        //predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
         if (predicted_index < 0)
         {
             predicted_index = 0;
@@ -569,13 +569,8 @@ long long ZM::get_point_index(ExpRecorder &exp_recorder, Point query_point)
             next_stage_length = stages[i + 1];
         }
 
-        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length; // <====== origin but not collect
-        /*
-        torch::Tensor res = index[i][predicted_index]->my_forward(torch::tensor({key})); // <========== use torch ,collect but very slow
-        predicted_index = (int)(res.item().toFloat() * next_stage_length);
-        */
-
-        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length; // <=== predict sinplely
+        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length; // <====== origin but not collect
+        //predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length; // <=== predict sinplely
 
         if (predicted_index < 0)
         {
@@ -806,8 +801,8 @@ void ZM::insert(ExpRecorder &exp_recorder, Point point)
         {
             next_stage_length = stages[i + 1];
         }
-        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
-        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
+        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        //predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
         net = &index[i][predicted_index];
         // predicted_index = net->forward(torch::tensor({key})).item().toFloat() * next_stage_length;
         if (predicted_index < 0)
@@ -876,8 +871,8 @@ void ZM::remove(ExpRecorder &exp_recorder, Point point)
         {
             next_stage_length = stages[i + 1];
         }
-        //predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
-        predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
+        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length;
+        //predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length;
         if (predicted_index < 0)
         {
             predicted_index = 0;
