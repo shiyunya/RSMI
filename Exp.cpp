@@ -131,6 +131,7 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     cout << "window_query time , " << exp_recorder.time << endl;
     cout << "window_query page_access , " << exp_recorder.page_access << endl;
     cout<< "window_query accuracy , " << exp_recorder.accuracy << endl;
+    cout<< "window_query_result_size / acc_window_query_resutl_size , " << exp_recorder.window_query_result_size * 1.0 /exp_recorder.acc_window_query_qesult_size << endl;
     file_writer.write_window_query(exp_recorder);
 
     exp_recorder.clean();
@@ -196,6 +197,7 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     cout << "window_query time , " << exp_recorder.time << endl;
     cout << "window_query page_access , " << exp_recorder.page_access << endl;
     cout<< "window_query accuracy , " << exp_recorder.accuracy << endl;
+    cout<< "window_query_result_size / acc_window_query_resutl_size , " << exp_recorder.window_query_result_size * 1.0 /exp_recorder.acc_window_query_qesult_size << endl;
     file_writer.write_window_query(exp_recorder);
 
     exp_recorder.clean();
