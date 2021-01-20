@@ -113,6 +113,9 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     cout << "build time , " << exp_recorder.time << endl;
     exp_recorder.size = (2 * Constants::HIDDEN_LAYER_WIDTH + Constants::HIDDEN_LAYER_WIDTH * 1 + Constants::HIDDEN_LAYER_WIDTH * 1 + 1) * Constants::EACH_DIM_LENGTH * exp_recorder.non_leaf_node_num + (Constants::DIM * Constants::PAGESIZE + Constants::PAGESIZE + Constants::DIM * Constants::DIM) * Constants::EACH_DIM_LENGTH * exp_recorder.leaf_node_num;
     file_writer.write_build(exp_recorder);
+    cout << "max_err , " << exp_recorder.max_error << endl;
+    cout << "min_err , " << exp_recorder.min_error << endl;
+
     exp_recorder.clean();
     partition->point_query(exp_recorder, points);
     cout << "point_query pageaccess , " << exp_recorder.page_access << endl;
@@ -172,6 +175,9 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     cout << "build time , " << exp_recorder.time << endl;
     exp_recorder.size = (2 * Constants::HIDDEN_LAYER_WIDTH + Constants::HIDDEN_LAYER_WIDTH * 1 + Constants::HIDDEN_LAYER_WIDTH * 1 + 1) * Constants::EACH_DIM_LENGTH * exp_recorder.non_leaf_node_num + (Constants::DIM * Constants::PAGESIZE + Constants::PAGESIZE + Constants::DIM * Constants::DIM) * Constants::EACH_DIM_LENGTH * exp_recorder.leaf_node_num;
     file_writer.write_build(exp_recorder);
+    cout << "max_err , " << exp_recorder.max_error << endl;
+    cout << "min_err , " << exp_recorder.min_error << endl;
+
     exp_recorder.clean();
     partition->point_query(exp_recorder, points);
     cout << "point_query time , " << exp_recorder.time << endl;
