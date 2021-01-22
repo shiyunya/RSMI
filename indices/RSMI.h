@@ -533,8 +533,8 @@ void RSMI::window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows)
         auto start = chrono::high_resolution_clock::now();
         window_query(exp_recorder, vertexes, query_windows[i]);
         auto finish = chrono::high_resolution_clock::now();
-        exp_recorder.window_query_result_size += exp_recorder.window_query_result.size();
-        exp_recorder.window_query_results.push_back(exp_recorder.window_query_result);
+        exp_recorder.window_query_result_size.push_back(exp_recorder.window_query_result.size());
+        //exp_recorder.window_query_results.push_back(exp_recorder.window_query_result);
 
         exp_recorder.window_query_result.clear();
         exp_recorder.window_query_result.shrink_to_fit();
@@ -789,9 +789,9 @@ void RSMI::acc_window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows
     {
         auto start = chrono::high_resolution_clock::now();
         vector<Point> acc_window_query_result = acc_window_query(exp_recorder, query_windows[i]);
-        exp_recorder.acc_window_query_qesult_size += acc_window_query_result.size();
-        exp_recorder.acc_window_query_results.push_back(acc_window_query_result);
-        //exp_recorder.acc_window_query_qesult_size += acc_window_query(exp_recorder, query_windows[i]).size();
+        exp_recorder.acc_window_query_result_size.push_back(acc_window_query_result.size());
+        //exp_recorder.acc_window_query_results.push_back(acc_window_query_result);
+        
         auto finish = chrono::high_resolution_clock::now();
         exp_recorder.time += chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
     }

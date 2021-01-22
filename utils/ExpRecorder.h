@@ -57,8 +57,10 @@ public:
     double accuracy_geometric;
     long size;
 
-    int window_query_result_size;
-    int acc_window_query_qesult_size;
+    //int window_query_result_size;
+    vector<int> window_query_result_size;
+    vector<int> acc_window_query_result_size;
+    
     vector<vector<Point>> knn_query_results;
     vector<vector<Point>> acc_knn_query_results;
 

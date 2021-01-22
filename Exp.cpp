@@ -111,7 +111,26 @@ void calclate_accuracy(ExpRecorder &exp_recorder,vector<vector<Point>> acc, vect
     exp_recorder.accuracy = sum * 1.0 / all_acc;
     exp_recorder.accuracy_geometric = pow(product , 1.0 / all_acc);
 }
+void calclate_window_accuracy(ExpRecorder &exp_recorder)
+{
+    vector<int> acc = exp_recorder.acc_window_query_result_size;
+    vector<int> pred = exp_recorder.window_query_result_size;
+    double sum = 0.0;
+    double product = 1.0;
+    int all_acc = acc.size();
 
+    for(int i = 0 ; i < acc.size() ; i++){
+        if(acc[i] == 0){
+            all_acc -= 1;
+            continue;
+        }
+        double accuracy = pred[i] * 1.0 / acc[i];
+        sum += accuracy;
+        product *= accuracy;
+    }
+    exp_recorder.accuracy = sum * 1.0 / all_acc;
+    exp_recorder.accuracy_geometric = pow(product , 1.0 / all_acc);
+}
 void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> points, map<string, vector<Mbr>> mbrs_map, vector<Point> query_poitns, vector<Point> insert_points, string model_path)
 {
     exp_recorder.clean();
@@ -144,12 +163,12 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     cout << "acc_window_query page_access , " << exp_recorder.page_access << endl;
     file_writer.write_acc_window_query(exp_recorder);
     partition->window_query(exp_recorder, mbrs_map[to_string(areas[2]) + to_string(ratios[2])]);
-    calclate_accuracy(exp_recorder,exp_recorder.acc_window_query_results,exp_recorder.window_query_results);
+    calclate_window_accuracy(exp_recorder);//,exp_recorder.acc_window_query_results,exp_recorder.window_query_results);
     cout << "window_query time , " << exp_recorder.time << endl;
     cout << "window_query page_access , " << exp_recorder.page_access << endl;
     cout<< "window_query accuracy , " << exp_recorder.accuracy << endl;
     cout<< "window_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
-    cout<< "window_query_result_size / acc_window_query_resutl_size , " << exp_recorder.window_query_result_size * 1.0 /exp_recorder.acc_window_query_qesult_size << endl;
+    //cout<< "window_query_result_size / acc_window_query_resutl_size , " << exp_recorder.window_query_result_size * 1.0 /exp_recorder.acc_window_query_result_size << endl;
     file_writer.write_window_query(exp_recorder);
 
     exp_recorder.clean();
@@ -214,12 +233,12 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     file_writer.write_acc_window_query(exp_recorder);
     
     partition->window_query(exp_recorder, mbrs_map[to_string(areas[2]) + to_string(ratios[2])]);
-    calclate_accuracy(exp_recorder,exp_recorder.acc_window_query_results,exp_recorder.window_query_results);
+    calclate_window_accuracy(exp_recorder);//,exp_recorder.acc_window_query_results,exp_recorder.window_query_results);
     cout << "window_query time , " << exp_recorder.time << endl;
     cout << "window_query page_access , " << exp_recorder.page_access << endl;
     cout<< "window_query accuracy , " << exp_recorder.accuracy << endl;
     cout<< "window_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
-    cout<< "window_query_result_size / acc_window_query_resutl_size , " << exp_recorder.window_query_result_size * 1.0 /exp_recorder.acc_window_query_qesult_size << endl;
+    //cout<< "window_query_result_size / acc_window_query_result_size , " << exp_recorder.window_query_result_size * 1.0 /exp_recorder.acc_window_query_result_size << endl;
     file_writer.write_window_query(exp_recorder);
 
     exp_recorder.clean();

@@ -102,8 +102,10 @@ void ExpRecorder::clean()
     leaf_node_num = 0;
     non_leaf_node_num = 0;
 
-    window_query_result_size = 0;
-    acc_window_query_qesult_size = 0;
+    window_query_result_size.clear();
+    window_query_result_size.shrink_to_fit();
+    acc_window_query_result_size.clear();
+    acc_window_query_result_size.shrink_to_fit();
 
     knn_query_results.clear();
     knn_query_results.shrink_to_fit();
