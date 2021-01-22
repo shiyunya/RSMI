@@ -68,24 +68,6 @@ double my_knn_diff(vector<vector<Point>> acc, vector<vector<Point>> pred)
     int all = 0;
     for(int i = 0 ; i < pred.size() ; i++){
         all += pred[i].size();
-        for(Point pred_point : pred[i]){
-            for(Point acc_point : acc[i]){
-                if (pred_point.x == acc_point.x && pred_point.y == acc_point.y){
-                    num++;
-                    break;
-                }
-            }
-        }
-    }
-    return num * 1.0 / all;
-}
-
-double calclate_accuracy(vector<vector<Point>> acc, vector<vector<Point>> pred)
-{
-    int num = 0;
-    int all = 0;
-    for(int i = 0 ; i < acc.size() ; i++){
-        all += acc[i].size();
         for(Point acc_point : acc[i]){
             for(Point pred_point : pred[i]){
                 if (pred_point.x == acc_point.x && pred_point.y == acc_point.y){
@@ -96,6 +78,38 @@ double calclate_accuracy(vector<vector<Point>> acc, vector<vector<Point>> pred)
         }
     }
     return num * 1.0 / all;
+}
+
+void calclate_accuracy(ExpRecorder &exp_recorder,vector<vector<Point>> acc, vector<vector<Point>> pred)
+{
+    int num = 0;
+    int all = 0;
+    double sum = 0.0;
+    double product = 1.0;
+    int all_acc = acc.size();
+    for(int i = 0 ; i < acc.size() ; i++){
+        all += acc[i].size();
+        int acc_size = acc[i].size();
+        int collect_size = 0;
+        for(Point acc_point : acc[i]){
+            for(Point pred_point : pred[i]){
+                if (pred_point.x == acc_point.x && pred_point.y == acc_point.y){
+                    num++;
+                    collect_size++;
+                    break;
+                }
+            }
+        }
+        if(acc_size == 0){
+            all_acc -= 1;
+            continue;
+        }
+        double accuracy = collect_size * 1.0 / acc_size;
+        sum += accuracy;
+        product *= accuracy;
+    }
+    exp_recorder.accuracy = sum * 1.0 / all_acc;
+    exp_recorder.accuracy_geometric = pow(product , 1.0 / all_acc);
 }
 
 void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> points, map<string, vector<Mbr>> mbrs_map, vector<Point> query_poitns, vector<Point> insert_points, string model_path)
@@ -130,10 +144,11 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     cout << "acc_window_query page_access , " << exp_recorder.page_access << endl;
     file_writer.write_acc_window_query(exp_recorder);
     partition->window_query(exp_recorder, mbrs_map[to_string(areas[2]) + to_string(ratios[2])]);
-    exp_recorder.accuracy = calclate_accuracy(exp_recorder.acc_window_query_results,exp_recorder.window_query_results);
+    calclate_accuracy(exp_recorder,exp_recorder.acc_window_query_results,exp_recorder.window_query_results);
     cout << "window_query time , " << exp_recorder.time << endl;
     cout << "window_query page_access , " << exp_recorder.page_access << endl;
     cout<< "window_query accuracy , " << exp_recorder.accuracy << endl;
+    cout<< "window_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
     cout<< "window_query_result_size / acc_window_query_resutl_size , " << exp_recorder.window_query_result_size * 1.0 /exp_recorder.acc_window_query_qesult_size << endl;
     file_writer.write_window_query(exp_recorder);
 
@@ -146,8 +161,9 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     partition->kNN_query(exp_recorder, query_poitns, ks[2]);
     cout << "kNN_query time , " << exp_recorder.time << endl;
     cout << "kNN_query page_access , " << exp_recorder.page_access << endl;
-    exp_recorder.accuracy = calclate_accuracy(exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
+    calclate_accuracy(exp_recorder,exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
     cout<< "kNN_query accuracy , " << exp_recorder.accuracy << endl;
+    cout<< "kNN_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
     file_writer.write_kNN_query(exp_recorder);
     exp_recorder.clean();
 
@@ -193,32 +209,32 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     exp_recorder.window_size = areas[2];
     exp_recorder.window_ratio = ratios[2];
     partition->acc_window_query(exp_recorder, mbrs_map[to_string(areas[2]) + to_string(ratios[2])]);
-    //cout << "acc_window_query_qesult_size , " << exp_recorder.acc_window_query_qesult_size << endl;
     cout << "acc_window_query time , " << exp_recorder.time << endl;
     cout << "acc_window_query page_access , " << exp_recorder.page_access << endl;
     file_writer.write_acc_window_query(exp_recorder);
+    
     partition->window_query(exp_recorder, mbrs_map[to_string(areas[2]) + to_string(ratios[2])]);
-    exp_recorder.accuracy = calclate_accuracy(exp_recorder.acc_window_query_results,exp_recorder.window_query_results);
-    //cout << "window_query_qesult_size , " << exp_recorder.window_query_result_size << endl;
+    calclate_accuracy(exp_recorder,exp_recorder.acc_window_query_results,exp_recorder.window_query_results);
     cout << "window_query time , " << exp_recorder.time << endl;
     cout << "window_query page_access , " << exp_recorder.page_access << endl;
     cout<< "window_query accuracy , " << exp_recorder.accuracy << endl;
+    cout<< "window_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
     cout<< "window_query_result_size / acc_window_query_resutl_size , " << exp_recorder.window_query_result_size * 1.0 /exp_recorder.acc_window_query_qesult_size << endl;
     file_writer.write_window_query(exp_recorder);
 
     exp_recorder.clean();
     exp_recorder.k_num = ks[2];
     partition->acc_kNN_query(exp_recorder, query_poitns, ks[2]);
-    //cout << "acc_knn_query_results.size , " << exp_recorder.acc_knn_query_results.size() << endl;
     cout << "acc_kNN_query time , " << exp_recorder.time << endl;
     cout << "acc_kNN_query page_access , " << exp_recorder.page_access << endl;
     file_writer.write_acc_kNN_query(exp_recorder);
+    
     partition->kNN_query(exp_recorder, query_poitns, ks[2]);
-    //cout << "knn_query_results.size," << exp_recorder.knn_query_results.size() << endl;
     cout << "kNN_query time , " << exp_recorder.time << endl;
     cout << "kNN_query page_access , " << exp_recorder.page_access << endl;
-    exp_recorder.accuracy = calclate_accuracy(exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
+    calclate_accuracy(exp_recorder,exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
     cout<< "kNN_query accuracy , " << exp_recorder.accuracy << endl;
+    cout<< "kNN_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
     file_writer.write_kNN_query(exp_recorder);
     exp_recorder.clean();
 
