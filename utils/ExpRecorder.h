@@ -54,6 +54,7 @@ public:
     int rebuild_num;
     double page_access = 1.0;
     double accuracy;
+    double accuracy_geometric;
     long size;
 
     int window_query_result_size;
