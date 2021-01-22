@@ -604,14 +604,13 @@ void RSMI::window_query(ExpRecorder &exp_recorder, vector<Point> vertexes, Mbr q
     }
     else
     {
-        int children_size = width;//children.size();
-        int front = children_size - 1;
+        int front = width;
         int back = 0;
         for (size_t i = 0; i < vertexes.size(); i++)
         {
-            int predicted_index = net->predict(vertexes[i]) * children_size;//children.size();
+            int predicted_index = net->predict(vertexes[i]) * width;
             predicted_index = predicted_index < 0 ? 0 : predicted_index;
-            predicted_index = predicted_index >= children_size ? children_size - 1 : predicted_index;
+            predicted_index = predicted_index >= width ? width - 1 : predicted_index;
             if (predicted_index < front)
             {
                 front = predicted_index;
@@ -686,11 +685,11 @@ void RSMI::window_query(ExpRecorder &exp_recorder, vector<Point> vertexes, Mbr q
             if (dis > boundary)
             {
                 continue;
-            }
+            }/*
             if (exp_recorder.pq.size() >= k && dis > kth)
             {
                 continue;
-            }
+            }*/
             if (leafnode.mbr.interact(query_window))
             {
                 exp_recorder.page_access += 1;
