@@ -257,17 +257,19 @@ void ZM::build(ExpRecorder &exp_recorder, vector<Point> points)
                 temp_index.push_back(net);
                 for (Point point : tmp_records[i][j])
                 {
-                    torch::Tensor res = net->forward(torch::tensor({point.normalized_curve_val}));
-                    int pos = 0;
+                    //torch::Tensor res = net->forward(torch::tensor({point.normalized_curve_val}));
+                    //int pos = 0;
+                    long long pos;
                     if (i == stages.size() - 1)
                     {
-                        pos = (int)(res.item().toFloat() * N);
+                        pos = net->predict_ZM(point.normalized_curve_val) * N;
+                        //pos = (int)(res.item().toFloat() * N);
                         // cout << "point->index: " << point->index << " predicted value: " << res.item().toFloat() << " pos: " << pos << endl;
                     }
                     else
                     {
-                        // pos = res.item().toFloat() * stages[i + 1] / N;
-                        pos = res.item().toFloat() * stages[i + 1];
+                        pos = net->predict_ZM(point.normalized_curve_val) * stages[i + 1];
+                        //pos = res.item().toFloat() * stages[i + 1];
                         // cout << "i: " << i << " pos: " << pos << endl;
                     }
                     if (pos < 0)
@@ -580,7 +582,7 @@ long long ZM::get_point_index(ExpRecorder &exp_recorder, Point query_point)
             next_stage_length = stages[i + 1];
         }
 
-        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length; // <====== origin but not collect
+        predicted_index = index[i][predicted_index]->predict_ZM(key) * next_stage_length; // <====== origin
         //predicted_index = index[i][predicted_index]->predictZM(key) * next_stage_length; // <=== predict sinplely
 
         if (predicted_index < 0)
@@ -876,7 +878,7 @@ void ZM::acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, in
 vector<Point> ZM::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
 {
     vector<Point> result;
-    float knn_query_side = sqrt((float)k / N) * 4;
+    float knn_query_side = sqrt((float)k / N) ;
     while (true)
     {
         Mbr mbr = Mbr::get_mbr(query_point, knn_query_side);
