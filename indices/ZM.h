@@ -809,6 +809,8 @@ void ZM::my_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int
     cout << "ZM::my_kNN_query" << endl;
     exp_recorder.knn_query_results.clear();
     exp_recorder.knn_query_results.shrink_to_fit();
+    exp_recorder.time = 0;
+    exp_recorder.page_access = 0;
     for (int i = 0; i < query_points.size(); i++)
     {
         auto start = chrono::high_resolution_clock::now();
@@ -827,7 +829,7 @@ void ZM::my_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int
 vector<Point> ZM::my_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
 {
     vector<Point> result;
-    float knn_query_side = 4 * sqrt((float)k / N);
+    float knn_query_side = sqrt((float)k / N);
     while (true)
     {
         Mbr mbr = Mbr::get_mbr(query_point, knn_query_side);
