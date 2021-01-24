@@ -100,6 +100,9 @@ public:
 
     void acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
     vector<Point> acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
+    
+    void my_acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
+    vector<Point> my_acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
 
     void insert(ExpRecorder &exp_recorder, Point);
     void insert(ExpRecorder &exp_recorder, vector<Point>);
@@ -659,22 +662,6 @@ vector<Point> ZM::my_window_query(ExpRecorder &exp_recorder, Mbr query_window)
 {
     vector<Point> window_query_results;
     vector<Point> vertexes = query_window.get_corner_points();
-
-    /*vector<long long> indices;
-    for (Point point : vertexes)
-    {
-        long long predicted_index = 0;
-        //cout << "x: " << point.x << " y: " << point.y << endl;
-        predicted_index = get_point_index(exp_recorder, point);
-        //cout << "predicted_index: " << predicted_index << endl;
-        indices.push_back(exp_recorder.index_low);
-        indices.push_back(exp_recorder.index_high);
-        //cout << "low: " << exp_recorder.index_low << " high: " << exp_recorder.index_high << endl;
-    }
-    sort(indices.begin(), indices.end());
-    long front = indices.front() / page_size;
-    long back = indices.back() / page_size;*/
-
     long long predicted_index = 0;
     predicted_index = get_point_index(exp_recorder,vertexes[0]);
     long front = exp_recorder.index_low / page_size;
@@ -699,7 +686,6 @@ vector<Point> ZM::my_window_query(ExpRecorder &exp_recorder, Mbr query_window)
             }
         }
     }
-    //cout<< window_query_results.size() <<endl;
     return window_query_results;
 }
 
@@ -828,8 +814,20 @@ void ZM::my_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int
 
 vector<Point> ZM::my_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
 {
+    /*
+    long long curve_val = compute_Z_value(query_point.x * N, query_point.y * N, bit_num);
+    float key = (curve_val - min_curve_val) * 1.0 / gap;
+    long long curve_val2 = compute_Z_value((query_point.x + 0.01) * N, (query_point.y + 0.01) * N, bit_num);
+    float key2 = (curve_val2 - min_curve_val) * 1.0 / gap;
+    float delta = key2 - key;
+    Point query_point2 = query_point;
+    query_point2.x += 0.01;
+    query_point2.y += 0.01;
+    long long predict1 = get_point_index(exp_recorder,query_point);
+    long long predict2 = get_point_index(exp_recorder,query_point2);
+    double rho = delta / ((predict2 - predict1)*1.0/N);*/
     vector<Point> result;
-    float knn_query_side = sqrt((float)k / N);
+    float knn_query_side = sqrt((float)k / N) * 0.25;
     while (true)
     {
         Mbr mbr = Mbr::get_mbr(query_point, knn_query_side);
@@ -848,8 +846,10 @@ vector<Point> ZM::my_kNN_query(ExpRecorder &exp_recorder, Point query_point, int
                 result = vec;
                 break;
             }
+            knn_query_side = knn_query_side * pow(2,0.5);
+        }else{
+            knn_query_side = knn_query_side * 2;
         }
-        knn_query_side = knn_query_side * 2;
         // cout << " knnquerySide: " << knnquerySide << endl;
     }
     return result;
@@ -876,7 +876,7 @@ void ZM::acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, in
 vector<Point> ZM::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
 {
     vector<Point> result;
-    float knn_query_side = sqrt((float)k / N);
+    float knn_query_side = sqrt((float)k / N) * 4;
     while (true)
     {
         Mbr mbr = Mbr::get_mbr(query_point, knn_query_side);
@@ -895,6 +895,52 @@ vector<Point> ZM::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, in
             }
         }
         knn_query_side = knn_query_side * 2;
+    }
+    return result;
+}
+
+void ZM::my_acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k)
+{
+    cout << "ZM::acc_kNN_query" << endl;
+    for (int i = 0; i < query_points.size(); i++)
+    {
+        auto start = chrono::high_resolution_clock::now();
+        vector<Point> knn_result = my_acc_kNN_query(exp_recorder, query_points[i], k);
+        auto finish = chrono::high_resolution_clock::now();
+        exp_recorder.time += chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
+        //exp_recorder.acc_knn_query_results.insert(exp_recorder.acc_knn_query_results.end(), knn_result.begin(), knn_result.end());
+        exp_recorder.acc_knn_query_results.push_back(knn_result);
+    
+    }
+    exp_recorder.time /= query_points.size();
+    exp_recorder.k_num = k;
+    exp_recorder.page_access = (double)exp_recorder.page_access / query_points.size();
+}
+
+vector<Point> ZM::my_acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
+{
+    vector<Point> result;
+    float knn_query_side = sqrt((float)k / N) * 0.25;
+    while (true)
+    {
+        Mbr mbr = Mbr::get_mbr(query_point, knn_query_side);
+        vector<Point> temp_result = acc_window_query(exp_recorder, mbr);
+        if (temp_result.size() >= k)
+        {
+            sort(temp_result.begin(), temp_result.end(), sortForKNN(query_point));
+            Point last = temp_result[k - 1];
+            if (last.cal_dist(query_point) <= knn_query_side)
+            {
+                auto bn = temp_result.begin();
+                auto en = temp_result.begin() + k;
+                vector<Point> vec(bn, en);
+                result = vec;
+                break;
+            }
+            knn_query_side = knn_query_side * pow(2,0.5);
+        }else{
+            knn_query_side = knn_query_side * 2;
+        }
     }
     return result;
 }
