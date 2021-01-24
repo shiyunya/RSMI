@@ -94,6 +94,10 @@ public:
 
     void kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
     vector<Point> kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
+
+    void my_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
+    vector<Point> my_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
+
     void acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
     vector<Point> acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
 
@@ -636,6 +640,8 @@ vector<Point> ZM::window_query(ExpRecorder &exp_recorder, Mbr query_window)
 void ZM::window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows)
 {
     cout << "ZM::window_query" << endl;
+    exp_recorder.window_query_result_size.clear();
+    exp_recorder.window_query_result_size.shrink_to_fit();
     auto start = chrono::high_resolution_clock::now();
     for (int i = 0; i < query_windows.size(); i++)
     {
@@ -777,6 +783,55 @@ vector<Point> ZM::kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
     {
         Mbr mbr = Mbr::get_mbr(query_point, knn_query_side);
         vector<Point> temp_result = window_query(exp_recorder, mbr);
+        // cout << "mbr: " << mbr->get_self() << "size: " << temp_result.size() << endl;
+        if (temp_result.size() >= k)
+        {
+            sort(temp_result.begin(), temp_result.end(), sortForKNN(query_point));
+            Point last = temp_result[k - 1];
+            // cout << " last dist : " << last->cal_dist(queryPoint) << " knnquerySide: " << knnquerySide << endl;
+            if (last.cal_dist(query_point) <= knn_query_side)
+            {
+                auto bn = temp_result.begin();
+                auto en = temp_result.begin() + k;
+                vector<Point> vec(bn, en);
+                result = vec;
+                break;
+            }
+        }
+        knn_query_side = knn_query_side * 2;
+        // cout << " knnquerySide: " << knnquerySide << endl;
+    }
+    return result;
+}
+
+void ZM::my_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k)
+{
+    cout << "ZM::my_kNN_query" << endl;
+    exp_recorder.knn_query_results.clear();
+    exp_recorder.knn_query_results.shrink_to_fit();
+    for (int i = 0; i < query_points.size(); i++)
+    {
+        auto start = chrono::high_resolution_clock::now();
+        vector<Point> knn_result = my_kNN_query(exp_recorder, query_points[i], k);
+        auto finish = chrono::high_resolution_clock::now();
+        exp_recorder.time += chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
+        //exp_recorder.knn_query_results.insert(exp_recorder.knn_query_results.end(), knn_result.begin(), knn_result.end());
+        exp_recorder.knn_query_results.push_back(knn_result);
+        
+        // cout << "knn_diff: " << knn_diff(acc_kNN_query(exp_recorder, query_points[i], k), kNN_query(exp_recorder, query_points[i], k)) << endl;
+    }
+    exp_recorder.time /= query_points.size();
+    exp_recorder.page_access = (double)exp_recorder.page_access / query_points.size();
+}
+
+vector<Point> ZM::my_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
+{
+    vector<Point> result;
+    float knn_query_side = 4 * sqrt((float)k / N);
+    while (true)
+    {
+        Mbr mbr = Mbr::get_mbr(query_point, knn_query_side);
+        vector<Point> temp_result = my_window_query(exp_recorder, mbr);
         // cout << "mbr: " << mbr->get_self() << "size: " << temp_result.size() << endl;
         if (temp_result.size() >= k)
         {
