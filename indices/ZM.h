@@ -85,6 +85,10 @@ public:
 
     void window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows);
     vector<Point> window_query(ExpRecorder &exp_recorder, Mbr query_window);
+
+    void my_window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows);
+    vector<Point> my_window_query(ExpRecorder &exp_recorder, Mbr query_window);
+
     void acc_window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows);
     vector<Point> acc_window_query(ExpRecorder &exp_recorder, Mbr query_windows);
 
@@ -644,6 +648,71 @@ void ZM::window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows)
     exp_recorder.page_access = (double)exp_recorder.page_access / query_windows.size();
 
 }
+
+vector<Point> ZM::my_window_query(ExpRecorder &exp_recorder, Mbr query_window)
+{
+    vector<Point> window_query_results;
+    vector<Point> vertexes = query_window.get_corner_points();
+
+    /*vector<long long> indices;
+    for (Point point : vertexes)
+    {
+        long long predicted_index = 0;
+        //cout << "x: " << point.x << " y: " << point.y << endl;
+        predicted_index = get_point_index(exp_recorder, point);
+        //cout << "predicted_index: " << predicted_index << endl;
+        indices.push_back(exp_recorder.index_low);
+        indices.push_back(exp_recorder.index_high);
+        //cout << "low: " << exp_recorder.index_low << " high: " << exp_recorder.index_high << endl;
+    }
+    sort(indices.begin(), indices.end());
+    long front = indices.front() / page_size;
+    long back = indices.back() / page_size;*/
+
+    long long predicted_index = 0;
+    predicted_index = get_point_index(exp_recorder,vertexes[0]);
+    long front = exp_recorder.index_low / page_size;
+    front = front < 0 ? 0 : front;
+    predicted_index = get_point_index(exp_recorder,vertexes[3]);
+    long back = exp_recorder.index_high / page_size;
+    back = back >= leafnodes.size() ? leafnodes.size() - 1 : back;
+    
+    //cout << "front: " << front << " back: " << back << endl;
+    for (size_t i = front; i <= back; i++)
+    {
+        LeafNode *leafnode = leafnodes[i];
+        if (leafnode->mbr.interact(query_window))
+        {
+            exp_recorder.page_access += 1;
+            for (Point point : *(leafnode->children))
+            {
+                if (query_window.contains(point))
+                {
+                    window_query_results.push_back(point);
+                }
+            }
+        }
+    }
+    //cout<< window_query_results.size() <<endl;
+    return window_query_results;
+}
+
+void ZM::my_window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows)
+{
+    cout << "ZM::my_window_query" << endl;
+    auto start = chrono::high_resolution_clock::now();
+    for (int i = 0; i < query_windows.size(); i++)
+    {
+        vector<Point> window_query_result = my_window_query(exp_recorder, query_windows[i]);
+        exp_recorder.window_query_result_size.push_back(window_query_result.size());
+        //exp_recorder.window_query_results.push_back(window_query_result);  
+    }
+    auto finish = chrono::high_resolution_clock::now();
+    exp_recorder.time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count() / query_windows.size();
+    exp_recorder.page_access = (double)exp_recorder.page_access / query_windows.size();
+
+}
+
 
 vector<Point> ZM::acc_window_query(ExpRecorder &exp_recorder, Mbr query_window)
 {

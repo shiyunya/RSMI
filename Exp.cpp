@@ -241,6 +241,15 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     //cout<< "window_query_result_size / acc_window_query_result_size , " << exp_recorder.window_query_result_size * 1.0 /exp_recorder.acc_window_query_result_size << endl;
     file_writer.write_window_query(exp_recorder);
 
+    exp_recorder.window_query_result_size.clear();
+    exp_recorder.window_query_result_size.shrink_to_fit();
+    partition->my_window_query(exp_recorder, mbrs_map[to_string(areas[2]) + to_string(ratios[2])]);
+    calclate_window_accuracy(exp_recorder);
+    cout << "my_window_query time , " << exp_recorder.time << endl;
+    cout << "my_window_query page_access , " << exp_recorder.page_access << endl;
+    cout<< "my_window_query accuracy , " << exp_recorder.accuracy << endl;
+    cout<< "my_window_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
+
     exp_recorder.clean();
     exp_recorder.k_num = ks[2];
     partition->acc_kNN_query(exp_recorder, query_poitns, ks[2]);
