@@ -65,6 +65,11 @@ public:
 
     void kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
     vector<Point> kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
+
+    void my_window_query_for_kNN(ExpRecorder &exp_recorder, vector<Point> vertexes, Mbr query_window, float boundary, int k, Point query_point, float &);
+    void my_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
+    vector<Point> my_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
+
     void acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
     vector<Point> acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
     double cal_rho(Point point);
@@ -536,9 +541,11 @@ void RSMI::window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows)
         auto start = chrono::high_resolution_clock::now();
         window_query(exp_recorder, vertexes, query_windows[i]);
         auto finish = chrono::high_resolution_clock::now();
-        exp_recorder.window_query_result_size += exp_recorder.window_query_results.size();
-        exp_recorder.window_query_results.clear();
-        exp_recorder.window_query_results.shrink_to_fit();
+        exp_recorder.window_query_result_size.push_back(exp_recorder.window_query_result.size());
+        //exp_recorder.window_query_results.push_back(exp_recorder.window_query_result);
+
+        exp_recorder.window_query_result.clear();
+        exp_recorder.window_query_result.shrink_to_fit();
         exp_recorder.time += chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
     }
     exp_recorder.time /= length;
@@ -595,7 +602,7 @@ void RSMI::window_query(ExpRecorder &exp_recorder, vector<Point> vertexes, Mbr q
                 {
                     if (query_window.contains(point))
                     {
-                        exp_recorder.window_query_results.push_back(point);
+                        exp_recorder.window_query_result.push_back(point);
                         // exp_recorder.window_query_result_size++;
                     }
                 }
@@ -605,14 +612,13 @@ void RSMI::window_query(ExpRecorder &exp_recorder, vector<Point> vertexes, Mbr q
     }
     else
     {
-        int children_size = children.size();
-        int front = children_size - 1;
+        int front = width;
         int back = 0;
         for (size_t i = 0; i < vertexes.size(); i++)
         {
-            int predicted_index = net->predict(vertexes[i]) * children.size();
+            int predicted_index = net->predict(vertexes[i]) * width;
             predicted_index = predicted_index < 0 ? 0 : predicted_index;
-            predicted_index = predicted_index >= children_size ? children_size - 1 : predicted_index;
+            predicted_index = predicted_index >= width ? width - 1 : predicted_index;
             if (predicted_index < front)
             {
                 front = predicted_index;
@@ -688,10 +694,10 @@ void RSMI::window_query(ExpRecorder &exp_recorder, vector<Point> vertexes, Mbr q
             {
                 continue;
             }
-            if (exp_recorder.pq.size() >= k && dis > kth)
+            /*if (exp_recorder.pq.size() >= k && dis > kth)
             {
                 continue;
-            }
+            }*/
             if (leafnode.mbr.interact(query_window))
             {
                 exp_recorder.page_access += 1;
@@ -735,10 +741,10 @@ void RSMI::window_query(ExpRecorder &exp_recorder, vector<Point> vertexes, Mbr q
             {
                 continue;
             }
-            if (exp_recorder.pq.size() >= k && children[i].mbr.cal_dist(query_point) > kth)
+            /*if (exp_recorder.pq.size() >= k && children[i].mbr.cal_dist(query_point) > kth)
             {
                 continue;
-            }
+            }*/
             if (children[i].mbr.interact(query_window))
             {
                 children[i].window_query(exp_recorder, vertexes, query_window, boundary, k, query_point, kth);
@@ -789,7 +795,10 @@ void RSMI::acc_window_query(ExpRecorder &exp_recorder, vector<Mbr> query_windows
     for (int i = 0; i < length; i++)
     {
         auto start = chrono::high_resolution_clock::now();
-        exp_recorder.acc_window_query_qesult_size += acc_window_query(exp_recorder, query_windows[i]).size();
+        vector<Point> acc_window_query_result = acc_window_query(exp_recorder, query_windows[i]);
+        exp_recorder.acc_window_query_result_size.push_back(acc_window_query_result.size());
+        //exp_recorder.acc_window_query_results.push_back(acc_window_query_result);
+        
         auto finish = chrono::high_resolution_clock::now();
         exp_recorder.time += chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
     }
@@ -820,39 +829,12 @@ void RSMI::kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int 
     exp_recorder.k_num = k;
 }
 
-double RSMI::cal_rho(Point point)
-{
-    // return 1;
-    int predicted_index = net->predict(point) * width;
-    predicted_index = predicted_index < 0 ? 0 : predicted_index;
-    predicted_index = predicted_index >= width ? width - 1 : predicted_index;
-    long long bk = 0;
-    for (int i = 0; i < predicted_index; i++)
-    {
-        if (children[i].N == 0)
-        {
-            return 1;
-        }
-        bk += children[i].N;
-    }
-    if (children[predicted_index].N == 0)
-    {
-        return 1;
-    }
-    long long bk1 = bk + children[predicted_index].N;
-    double result = bk1 * 1.0 / bk;
-    // TODO use 4 to avoid a large number
-    result = result > 1 ? result : 1;
-    result = result > 4 ? 4 : result;
-    return result;
-}
-
 vector<Point> RSMI::kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
 {
-    // double rh0 = cal_rho(query_point);
-    // float knnquery_side = sqrt((float)k / N) * rh0;
+    double rh0 = 1;//cal_rho(query_point);
+    float knnquery_side = sqrt((float)k / N) * rh0;
     vector<Point> result;
-    float knnquery_side = sqrt((float)k / N) * 4;
+    //float knnquery_side = sqrt((float)k / N) * 4;
     while (true)
     {
         Mbr mbr = Mbr::get_mbr(query_point, knnquery_side);
@@ -872,6 +854,167 @@ vector<Point> RSMI::kNN_query(ExpRecorder &exp_recorder, Point query_point, int 
             break;
         }
         knnquery_side *= 2;
+    }
+    return result;
+}
+
+void RSMI::my_window_query_for_kNN(ExpRecorder &exp_recorder, vector<Point> vertexes, Mbr query_window, float boundary, int k, Point query_point, float &kth)
+{
+    if (is_last)
+    {
+        int leafnodesSize = leafnodes.size();
+        int front = leafnodesSize - 1;
+        int back = 0;
+        if (leaf_node_num == 0)
+        {
+            return;
+        }
+        else if (leaf_node_num < 2)
+        {
+            front = 0;
+            back = 0;
+        }
+        else
+        {
+            int max = 0;
+            int min = width;
+            for (size_t i = 0; i < vertexes.size(); i++)
+            {
+                auto start = chrono::high_resolution_clock::now();
+                int predicted_index = net->predict(vertexes[i]) * leaf_node_num;
+                auto finish = chrono::high_resolution_clock::now();
+                predicted_index = predicted_index < 0 ? 0 : predicted_index;
+                predicted_index = predicted_index > width ? width : predicted_index;
+                int predictedIndexMax = predicted_index + max_error;
+                int predictedIndexMin = predicted_index + min_error;
+                if (predictedIndexMin < min)
+                {
+                    min = predictedIndexMin;
+                }
+                if (predictedIndexMax > max)
+                {
+                    max = predictedIndexMax;
+                }
+            }
+
+            front = min < 0 ? 0 : min;
+            back = max >= leafnodesSize ? leafnodesSize - 1 : max;
+        }
+        for (size_t i = front; i <= back; i++)
+        {
+            LeafNode leafnode = leafnodes[i];
+            float dis = leafnode.mbr.cal_dist(query_point);
+            if (dis > boundary)
+            {
+                continue;
+            }
+            if (leafnode.mbr.interact(query_window))
+            {
+                exp_recorder.page_access += 1;
+                for (Point point : (*leafnode.children))
+                {
+                    if (query_window.contains(point))
+                    {
+                        exp_recorder.pq.push(point);
+                    }
+                }
+            }
+        }
+        return;
+    }
+    else
+    {
+        int front = width;
+        int back = 0;
+        for (size_t i = 0; i < vertexes.size(); i++)
+        {
+            auto start = chrono::high_resolution_clock::now();
+            int predicted_index = net->predict(vertexes[i]) * width;
+            auto finish = chrono::high_resolution_clock::now();
+            predicted_index = predicted_index < 0 ? 0 : predicted_index;
+            predicted_index = predicted_index >= width ? width - 1 : predicted_index;
+            if (predicted_index < front)
+            {
+                front = predicted_index;
+            }
+            if (predicted_index > back)
+            {
+                back = predicted_index;
+            }
+        }
+        for (size_t i = front; i <= back; i++)
+        {
+            if (children.count(i) == 0)
+            {
+                continue;
+            }
+            if (children[i].mbr.interact(query_window))
+            {
+                children[i].window_query(exp_recorder, vertexes, query_window, boundary, k, query_point, kth);
+            }
+        }
+    }
+}
+
+void RSMI::my_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k)
+{
+    int length = query_points.size();
+    exp_recorder.time = 0;
+    exp_recorder.page_access = 0;
+    exp_recorder.knn_query_results.clear();
+    exp_recorder.knn_query_results.shrink_to_fit();
+    // length = 2;
+    for (int i = 0; i < length; i++)
+    {
+        priority_queue<Point , vector<Point>, sortForKNN2> temp_pq;
+        exp_recorder.pq = temp_pq;
+        auto start = chrono::high_resolution_clock::now();
+        vector<Point> knnresult = my_kNN_query(exp_recorder, query_points[i], k);
+        auto finish = chrono::high_resolution_clock::now();
+        long long temp_time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
+        exp_recorder.time += temp_time;
+        //exp_recorder.knn_query_results.insert(exp_recorder.knn_query_results.end(), knnresult.begin(), knnresult.end());
+        exp_recorder.knn_query_results.push_back(knnresult);
+    }
+    exp_recorder.time /= length;
+    exp_recorder.page_access = (double)exp_recorder.page_access / length;
+    exp_recorder.k_num = k;
+}
+
+vector<Point> RSMI::my_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
+{
+    double rh0 = 1;//cal_rho(query_point);
+    float knn_query_side = sqrt((float)k / N) * rh0;
+    vector<Point> result;
+    //float knn_query_side = sqrt((float)k / N) * 0.25;//rh0;
+    while (true)
+    {
+        Mbr mbr = Mbr::get_mbr(query_point, knn_query_side);
+        vector<Point> vertexes = mbr.get_corner_points();
+
+        int size = 0;
+        float kth = 0.0;
+        my_window_query_for_kNN(exp_recorder, vertexes, mbr, knn_query_side, k, query_point, kth);
+        size = exp_recorder.pq.size();
+        if (size >= k)
+        {
+            for (size_t i = 0; i < k; i++)
+            {
+                result.push_back(exp_recorder.pq.top());
+                exp_recorder.pq.pop();
+            }
+            float dist = result[k-1].cal_dist(query_point);
+            if (dist <= knn_query_side){
+                break;
+            }else{
+                //knn_query_side *= pow(2,0.5);
+                knn_query_side = dist * 2;
+                result.clear();
+                result.shrink_to_fit();
+            }
+        }else{
+            knn_query_side *= 2;
+        }
     }
     return result;
 }
@@ -897,8 +1040,9 @@ void RSMI::acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, 
 
 vector<Point> RSMI::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
 {
+    double rh0 = 1;//cal_rho(query_point);
     vector<Point> result;
-    float knnquery_side = sqrt((float)k / N);
+    float knnquery_side = sqrt((float)k / N) * rh0;
     while (true)
     {
         Mbr mbr = Mbr::get_mbr(query_point, knnquery_side);
@@ -907,7 +1051,8 @@ vector<Point> RSMI::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, 
         {
             sort(tempResult.begin(), tempResult.end(), sortForKNN(query_point));
             Point last = tempResult[k - 1];
-            if (last.cal_dist(query_point) <= knnquery_side)
+            float dist = last.cal_dist(query_point);
+            if (dist <= knnquery_side)
             {
                 // TODO get top K from the vector.
                 auto bn = tempResult.begin();
@@ -915,9 +1060,12 @@ vector<Point> RSMI::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, 
                 vector<Point> vec(bn, en);
                 result = vec;
                 break;
+            }else{
+                knnquery_side = dist * 2;
             }
+        }else{
+            knnquery_side = knnquery_side * 2;
         }
-        knnquery_side = knnquery_side * 2;
     }
     return result;
 }
@@ -1029,4 +1177,31 @@ void RSMI::remove(ExpRecorder &exp_recorder, vector<Point> points)
     long long oldTimeCost = exp_recorder.delete_time * exp_recorder.delete_num;
     exp_recorder.delete_num += points.size();
     exp_recorder.delete_time = (oldTimeCost + oldTimeCost + chrono::duration_cast<chrono::nanoseconds>(finish - start).count()) / exp_recorder.delete_num;
+}
+
+double RSMI::cal_rho(Point point)
+{
+    // return 1;
+    int predicted_index = net->predict(point) * width;
+    predicted_index = predicted_index < 0 ? 0 : predicted_index;
+    predicted_index = predicted_index >= width ? width - 1 : predicted_index;
+    long long bk = 0;
+    for (int i = 0; i < predicted_index; i++)
+    {
+        if (children[i].N == 0)
+        {
+            return 1;
+        }
+        bk += children[i].N;
+    }
+    if (children[predicted_index].N == 0)
+    {
+        return 1;
+    }
+    long long bk1 = bk + children[predicted_index].N;
+    double result = bk1 * 1.0 / bk;
+    // TODO use 4 to avoid a large number
+    result = result > 1 ? result : 1;
+    result = result > 4 ? 4 : result;
+    return result;
 }

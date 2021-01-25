@@ -54,14 +54,19 @@ public:
     int rebuild_num;
     double page_access = 1.0;
     double accuracy;
+    double accuracy_geometric;
     long size;
 
-    int window_query_result_size;
-    int acc_window_query_qesult_size;
+    //int window_query_result_size;
+    vector<int> window_query_result_size;
+    vector<int> acc_window_query_result_size;
+    
     vector<vector<Point>> knn_query_results;
     vector<vector<Point>> acc_knn_query_results;
 
-    vector<Point> window_query_results;
+    vector<Point> window_query_result;
+    vector<vector<Point>> window_query_results;
+    vector<vector<Point>> acc_window_query_results;
     ExpRecorder();
     string get_time();
     string get_time_pageaccess();
