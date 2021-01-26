@@ -108,7 +108,7 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
     auto start = chrono::high_resolution_clock::now();
     if (points.size() <= exp_recorder.N)
     {
-        //cout << "leaf model" << endl;
+        //cout << "leaf model ";
         this->model_path += "_" + to_string(level) + "_" + to_string(index);
         if (exp_recorder.depth < level)
         {
@@ -181,7 +181,7 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
             locations.push_back(point.y);
             labels.push_back(point.index);
         }
-        
+        //cout << level << "," << index << "(leaf) ";
         std::ifstream fin(this->model_path);
         if (!fin)
         {
@@ -193,8 +193,9 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
             torch::load(net, this->model_path);
             net->width = net->parameters()[0].sizes()[0];
         }
+	//cout << "fin ";
         net->get_parameters();
-
+	//cout << "get" << endl;
         exp_recorder.non_leaf_node_num++;
         for (int i = 0; i < N; i++)
         {
@@ -231,9 +232,10 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
     }
     else
     {
-        //cout << "not leaf model" << endl;
+        //cout << "not leaf model " ;
         is_last = false;
         N = (long long)points.size();
+	//cout << "size:" << N << endl;
         int bit_num = max_partition_num;
         int partition_size = ceil(points.size() * 1.0 / pow(bit_num, 2));
         sort(points.begin(), points.end(), sortX());
@@ -303,6 +305,7 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
 
         int epoch = Constants::START_EPOCH;
         bool is_retrain = false;
+        this->model_path += "_" + to_string(level) + "_" + to_string(index);
         do
         {
             net = std::make_shared<Net>(2);
@@ -310,8 +313,9 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
                 net->to(torch::kCUDA);
             #endif
 
-            this->model_path += "_" + to_string(level) + "_" + to_string(index);
+            //this->model_path += "_" + to_string(level) + "_" + to_string(index);
             std::ifstream fin(this->model_path);
+	    //cout << this->model_path << " , ";
             if (!fin)
             {
                 net->train_model(locations, labels);
@@ -320,9 +324,14 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
             else
             {
                 torch::load(net, this->model_path);
+		if (is_retrain){
+                    net->train_model(locations, labels);
+                    torch::save(net, this->model_path);
+		}
             }
+	    //cout << "fin ";
             net->get_parameters();
-
+	    //cout << "get" << endl;
             for (Point point : points)
             {
                 int predicted_index = (int)(net->predict(point) * width);

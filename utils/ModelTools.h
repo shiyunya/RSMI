@@ -183,9 +183,11 @@ public:
     torch::Tensor forward(torch::Tensor x)
     {
         // Use one of many tensor manipulation functions.
-        // x = torch::sigmoid(fc1->forward(x));
+        
+	//x = torch::sigmoid(fc1->forward(x));
         x = torch::relu(fc1->forward(x));
-        // x = fc1->forward(x);
+        
+	// x = fc1->forward(x);
         x = fc2->forward(x);
         // x = torch::dropout(x, /*p=*/0.5, /*train=*/is_training());
         // x = torch::relu(fc2->forward(x));
@@ -354,11 +356,14 @@ public:
 
     float activation(float val)
     {
+	//return 1.0 / (1.0 + exp(-val));
+	
         if (val > 0.0)
         {
             return val;
         }
         return 0.0;
+	
     }
 
     void train_model(vector<float> locations, vector<float> labels)
@@ -403,7 +408,7 @@ public:
             for (size_t epoch = 0; epoch < Constants::EPOCH; epoch++)
             {
                 optimizer.zero_grad();
-                torch::Tensor loss = torch::l1_loss(this->forward(x), y);
+                torch::Tensor loss = torch::mse_loss(this->forward(x), y);//l1_loss
                 #ifdef use_gpu
                     loss.to(torch::kCUDA);
                 #endif
