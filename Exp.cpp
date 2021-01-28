@@ -195,6 +195,7 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
 
     /*
     exp_recorder.clean();
+    /*
     partition->insert(exp_recorder, insert_points);
     cout << "insert_time , " << exp_recorder.insert_time << endl;
     exp_recorder.clean();
@@ -256,7 +257,6 @@ void exp_RSMI_query_test(FileWriter file_writer, ExpRecorder exp_recorder, vecto
 
         exp_recorder.clean();
     }
-
 }
 
 

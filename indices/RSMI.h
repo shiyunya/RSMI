@@ -234,7 +234,10 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
         //cout << "not leaf model" << endl;
         is_last = false;
         N = (long long)points.size();
-        int bit_num = max_partition_num;
+        
+        int bit_num = pow(2,floor(log(N * 1.0 / page_size) / log(4)));//max_partition_num;
+        bit_num = bit_num > max_partition_num ? max_partition_num : bit_num;
+
         int partition_size = ceil(points.size() * 1.0 / pow(bit_num, 2));
         sort(points.begin(), points.end(), sortX());
         long long side = pow(bit_num, 2);
@@ -303,6 +306,7 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
 
         int epoch = Constants::START_EPOCH;
         bool is_retrain = false;
+        this->model_path += "_" + to_string(level) + "_" + to_string(index);
         do
         {
             net = std::make_shared<Net>(2);
@@ -310,7 +314,7 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
                 net->to(torch::kCUDA);
             #endif
 
-            this->model_path += "_" + to_string(level) + "_" + to_string(index);
+            //this->model_path += "_" + to_string(level) + "_" + to_string(index);
             std::ifstream fin(this->model_path);
             if (!fin)
             {
@@ -320,6 +324,10 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
             else
             {
                 torch::load(net, this->model_path);
+		if(is_retrain){
+                    net->train_model(locations, labels);	
+                    torch::save(net, this->model_path);
+		}
             }
             net->get_parameters();
 
