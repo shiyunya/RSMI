@@ -194,6 +194,7 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     cout<< "my_kNN_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
 
     exp_recorder.clean();
+    /*
     partition->insert(exp_recorder, insert_points);
     cout << "insert_time , " << exp_recorder.insert_time << endl;
     exp_recorder.clean();
@@ -201,6 +202,7 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     //cout << "point_query_after_update pageaccess , " << exp_recorder.page_access << endl;
     cout << "point_query_after_update time , " << exp_recorder.time << endl;
     exp_recorder.clean();
+    */
 }
 
 
@@ -287,6 +289,7 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     cout<< "my_kNN_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
     
     exp_recorder.clean();
+    /*
     partition->insert(exp_recorder, insert_points);
     cout << "insert time , " << exp_recorder.insert_time << endl;
     exp_recorder.clean();
@@ -294,6 +297,7 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     cout << "point_query_after_update time , " << exp_recorder.time << endl;
     //cout << "point_query_after_update pageaccess , " << exp_recorder.page_access << endl;
     exp_recorder.clean();
+    */
 }
 
 string RSMI::model_path_root = "";
