@@ -173,8 +173,8 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
 
     exp_recorder.clean();
     exp_recorder.k_num = ks[2];
-    //partition->acc_kNN_query(exp_recorder, query_poitns, ks[2]);
-    partition->my_acc_kNN_query(exp_recorder, points, query_poitns, ks[2]);
+    partition->acc_kNN_query(exp_recorder, query_poitns, ks[2]);
+    //partition->my_acc_kNN_query(exp_recorder, points, query_poitns, ks[2]);
     cout << "acc_kNN_query time , " << exp_recorder.time << endl;
     //cout << "acc_kNN_query page_access , " << exp_recorder.page_access << endl;
     file_writer.write_acc_kNN_query(exp_recorder);
@@ -192,6 +192,13 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     //cout << "my_kNN_query page_access , " << exp_recorder.page_access << endl;
     calclate_accuracy(exp_recorder,exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
     cout<< "my_kNN_query accuracy , " << exp_recorder.accuracy << endl;
+    cout<< "my_kNN_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
+
+    partition->my_kNN_query_fast(exp_recorder, query_poitns, ks[2]);
+    cout << "my_kNN_query_fast time , " << exp_recorder.time << endl;
+    //cout << "my_kNN_query page_access , " << exp_recorder.page_access << endl;
+    calclate_accuracy(exp_recorder,exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
+    cout<< "my_kNN_query_fast accuracy , " << exp_recorder.accuracy << endl;
     cout<< "my_kNN_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
 
     exp_recorder.clean();
@@ -244,18 +251,23 @@ void exp_RSMI_query_test(FileWriter file_writer, ExpRecorder exp_recorder, vecto
     for(int i = 0;i < 5;i++){
         cout << "kNN query k : " << ks[i] << endl;
         exp_recorder.k_num = ks[i];
-        partition->my_acc_kNN_query(exp_recorder, points, query_poitns, ks[i]);
-        //cout << "acc_kNN_query time , " << exp_recorder.time << endl;
-        //cout << "acc_kNN_query page_access , " << exp_recorder.page_access << endl;
+        partition->acc_kNN_query(exp_recorder, query_poitns, ks[i]);
         file_writer.write_acc_kNN_query(exp_recorder);
+
+        partition->kNN_query(exp_recorder, query_poitns, ks[i]);
+        cout << "kNN_query time , " << exp_recorder.time << endl;
+        calclate_accuracy(exp_recorder,exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
+        cout<< "kNN_query accuracy , " << exp_recorder.accuracy << endl;
 
         partition->my_kNN_query(exp_recorder, query_poitns, ks[i]);
         cout << "my_kNN_query time , " << exp_recorder.time << endl;
-        //cout << "my_kNN_query page_access , " << exp_recorder.page_access << endl;
         calclate_accuracy(exp_recorder,exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
         cout<< "my_kNN_query accuracy , " << exp_recorder.accuracy << endl;
-        //cout<< "my_kNN_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
 
+        partition->my_kNN_query_fast(exp_recorder, query_poitns, ks[i]);
+        cout << "my_kNN_query_fast time , " << exp_recorder.time << endl;
+        calclate_accuracy(exp_recorder,exp_recorder.acc_knn_query_results, exp_recorder.knn_query_results);
+        cout<< "my_kNN_query_fast accuracy , " << exp_recorder.accuracy << endl;
         exp_recorder.clean();
     }
 }
@@ -316,7 +328,8 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
 
     exp_recorder.clean();
     exp_recorder.k_num = ks[2];
-    partition->my_acc_kNN_query(exp_recorder, points, query_poitns, ks[2]);
+    partition->acc_kNN_query(exp_recorder, query_poitns, ks[2]);
+    //partition->my_acc_kNN_query(exp_recorder, points, query_poitns, ks[2]);
     cout << "acc_kNN_query time , " << exp_recorder.time << endl;
     //cout << "acc_kNN_query page_access , " << exp_recorder.page_access << endl;
     file_writer.write_acc_kNN_query(exp_recorder);
@@ -392,7 +405,8 @@ void exp_ZM_query_test(FileWriter file_writer, ExpRecorder exp_recorder, vector<
     for(int i = 0;i < 5;i++){
             exp_recorder.clean();
             exp_recorder.k_num = ks[i];
-            partition->my_acc_kNN_query(exp_recorder, points, query_poitns, ks[i]);
+            partition->acc_kNN_query(exp_recorder, query_poitns, ks[i]);
+            //partition->my_acc_kNN_query(exp_recorder, points, query_poitns, ks[i]);
             file_writer.write_acc_kNN_query(exp_recorder);
             
             partition->kNN_query(exp_recorder, query_poitns, ks[i]);

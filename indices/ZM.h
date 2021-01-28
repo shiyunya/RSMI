@@ -878,7 +878,7 @@ void ZM::acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, in
 vector<Point> ZM::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
 {
     vector<Point> result;
-    float knn_query_side = sqrt((float)k / N) ;
+    float knn_query_side = sqrt((float)k / N) * 10;
     while (true)
     {
         Mbr mbr = Mbr::get_mbr(query_point, knn_query_side);

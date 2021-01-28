@@ -70,6 +70,9 @@ public:
     void my_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
     vector<Point> my_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
 
+    void my_kNN_query_fast(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
+    vector<Point> my_kNN_query_fast(ExpRecorder &exp_recorder, Point query_point, int k);
+
     void acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
     vector<Point> acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
 
@@ -1029,6 +1032,69 @@ vector<Point> RSMI::my_kNN_query(ExpRecorder &exp_recorder, Point query_point, i
     return result;
 }
 
+void RSMI::my_kNN_query_fast(ExpRecorder &exp_recorder, vector<Point> query_points, int k)
+{
+    int length = query_points.size();
+    exp_recorder.time = 0;
+    exp_recorder.page_access = 0;
+    exp_recorder.knn_query_results.clear();
+    exp_recorder.knn_query_results.shrink_to_fit();
+    // length = 2;
+    for (int i = 0; i < length; i++)
+    {
+        priority_queue<Point , vector<Point>, sortForKNN2> temp_pq;
+        exp_recorder.pq = temp_pq;
+        auto start = chrono::high_resolution_clock::now();
+        vector<Point> knnresult = my_kNN_query_fast(exp_recorder, query_points[i], k);
+        auto finish = chrono::high_resolution_clock::now();
+        long long temp_time = chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
+        exp_recorder.time += temp_time;
+        //exp_recorder.knn_query_results.insert(exp_recorder.knn_query_results.end(), knnresult.begin(), knnresult.end());
+        exp_recorder.knn_query_results.push_back(knnresult);
+    }
+    exp_recorder.time /= length;
+    exp_recorder.page_access = (double)exp_recorder.page_access / length;
+    exp_recorder.k_num = k;
+}
+
+vector<Point> RSMI::my_kNN_query_fast(ExpRecorder &exp_recorder, Point query_point, int k)
+{
+    double rh0 = 0.25;//cal_rho(query_point);
+    float knn_query_side = sqrt((float)k / N) * rh0;
+    vector<Point> result;
+    //float knn_query_side = sqrt((float)k / N) * 0.25;//rh0;
+    while (true)
+    {
+        Mbr mbr = Mbr::get_mbr(query_point, knn_query_side);
+        vector<Point> vertexes = mbr.get_corner_points();
+
+        int size = 0;
+        float kth = 0.0;
+        my_window_query_for_kNN(exp_recorder, vertexes, mbr, knn_query_side, k, query_point, kth);
+        size = exp_recorder.pq.size();
+        if (size >= k)
+        {
+            for (size_t i = 0; i < k; i++)
+            {
+                result.push_back(exp_recorder.pq.top());
+                exp_recorder.pq.pop();
+            }
+            float dist = result[k-1].cal_dist(query_point);
+            if (dist <= knn_query_side){
+                break;
+            }else{
+                //knn_query_side *= pow(2,0.5);
+                knn_query_side = dist * 2;
+                result.clear();
+                result.shrink_to_fit();
+            }
+        }else{
+            knn_query_side *= 2;
+        }
+    }
+    return result;
+}
+
 void RSMI::acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k)
 {
     int length = query_points.size();
@@ -1050,7 +1116,7 @@ void RSMI::acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, 
 
 vector<Point> RSMI::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
 {
-    double rh0 = 1;//cal_rho(query_point);
+    double rh0 = 10;//cal_rho(query_point);
     vector<Point> result;
     float knnquery_side = sqrt((float)k / N) * rh0;
     while (true)
@@ -1070,9 +1136,8 @@ vector<Point> RSMI::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, 
                 vector<Point> vec(bn, en);
                 result = vec;
                 break;
-            }else{
-                knnquery_side = dist * 2;
             }
+            knnquery_side = knnquery_side * 2;
         }else{
             knnquery_side = knnquery_side * 2;
         }
