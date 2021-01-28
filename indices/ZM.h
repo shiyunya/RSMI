@@ -101,8 +101,8 @@ public:
     void acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
     vector<Point> acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
     
-    void my_acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
-    vector<Point> my_acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
+    void my_acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> all_points, vector<Point> query_points, int k);
+    vector<Point> my_acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> all_points, Point query_point, int k);
 
     void insert(ExpRecorder &exp_recorder, Point);
     void insert(ExpRecorder &exp_recorder, vector<Point>);
@@ -901,13 +901,13 @@ vector<Point> ZM::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, in
     return result;
 }
 
-void ZM::my_acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k)
+void ZM::my_acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> all_points,vector<Point> query_points, int k)
 {
     cout << "ZM::acc_kNN_query" << endl;
     for (int i = 0; i < query_points.size(); i++)
     {
         auto start = chrono::high_resolution_clock::now();
-        vector<Point> knn_result = my_acc_kNN_query(exp_recorder, query_points[i], k);
+        vector<Point> knn_result = my_acc_kNN_query(exp_recorder, all_points,query_points[i], k);
         auto finish = chrono::high_resolution_clock::now();
         exp_recorder.time += chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
         //exp_recorder.acc_knn_query_results.insert(exp_recorder.acc_knn_query_results.end(), knn_result.begin(), knn_result.end());
@@ -919,31 +919,16 @@ void ZM::my_acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points,
     exp_recorder.page_access = (double)exp_recorder.page_access / query_points.size();
 }
 
-vector<Point> ZM::my_acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
+vector<Point> ZM::my_acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> all_points, Point query_point, int k)
 {
     vector<Point> result;
-    float knn_query_side = sqrt((float)k / N) * 0.25;
-    while (true)
-    {
-        Mbr mbr = Mbr::get_mbr(query_point, knn_query_side);
-        vector<Point> temp_result = acc_window_query(exp_recorder, mbr);
-        if (temp_result.size() >= k)
-        {
-            sort(temp_result.begin(), temp_result.end(), sortForKNN(query_point));
-            Point last = temp_result[k - 1];
-            if (last.cal_dist(query_point) <= knn_query_side)
-            {
-                auto bn = temp_result.begin();
-                auto en = temp_result.begin() + k;
-                vector<Point> vec(bn, en);
-                result = vec;
-                break;
-            }
-            knn_query_side = knn_query_side * pow(2,0.5);
-        }else{
-            knn_query_side = knn_query_side * 2;
-        }
-    }
+
+    sort(all_points.begin(), all_points.end(), sortForKNN(query_point));
+    auto bn = all_points.begin();
+    auto en = all_points.begin() + k;
+    vector<Point> vec(bn, en);
+
+    result = vec;
     return result;
 }
 

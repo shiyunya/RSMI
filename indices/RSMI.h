@@ -72,6 +72,11 @@ public:
 
     void acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, int k);
     vector<Point> acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k);
+
+    
+    void my_acc_kNN_query(ExpRecorder &exp_recorder,vector<Point> all_points, vector<Point> query_point, int k);
+    vector<Point> my_acc_kNN_query(ExpRecorder &exp_recorder,vector<Point> all_points, Point query_point, int k);
+
     double cal_rho(Point point);
     double knn_diff(vector<Point> acc, vector<Point> pred);
 
@@ -324,10 +329,10 @@ void RSMI::build(ExpRecorder &exp_recorder, vector<Point> points)
             else
             {
                 torch::load(net, this->model_path);
-		if(is_retrain){
+		        if(is_retrain){
                     net->train_model(locations, labels);	
                     torch::save(net, this->model_path);
-		}
+		        }
             }
             net->get_parameters();
 
@@ -1072,6 +1077,37 @@ vector<Point> RSMI::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, 
             knnquery_side = knnquery_side * 2;
         }
     }
+    return result;
+}
+void RSMI::my_acc_kNN_query(ExpRecorder &exp_recorder,vector<Point> all_points,vector<Point> query_points, int k)
+{
+    int length = query_points.size();
+    // length = 1;
+    for (int i = 0; i < length; i++)
+    {
+        auto start = chrono::high_resolution_clock::now();
+        vector<Point> knnresult = my_acc_kNN_query(exp_recorder, all_points, query_points[i], k);
+        auto finish = chrono::high_resolution_clock::now();
+        exp_recorder.time += chrono::duration_cast<chrono::nanoseconds>(finish - start).count();
+        //exp_recorder.acc_knn_query_results.insert(exp_recorder.acc_knn_query_results.end(), knnresult.begin(), knnresult.end());
+        exp_recorder.acc_knn_query_results.push_back(knnresult);
+    
+    }
+    exp_recorder.time /= length;
+    exp_recorder.k_num = k;
+    exp_recorder.page_access = (double)exp_recorder.page_access / length;
+}
+
+vector<Point> RSMI::my_acc_kNN_query(ExpRecorder &exp_recorder,vector<Point> all_points, Point query_point, int k)
+{
+    vector<Point> result;
+
+    sort(all_points.begin(), all_points.end(), sortForKNN(query_point));
+    auto bn = all_points.begin();
+    auto en = all_points.begin() + k;
+    vector<Point> vec(bn, en);
+
+    result = vec;
     return result;
 }
 
