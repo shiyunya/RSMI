@@ -384,6 +384,9 @@ void ZM::point_query(ExpRecorder &exp_recorder, Point query_point)
             {
                 //cout << "find it" << endl;
                 break;
+            }else{
+                //cout << "not found" << endl;
+                break;
             }
         }
         if ((*leafnode->children)[0].curve_val < curve_val)
@@ -499,6 +502,9 @@ void ZM::point_query_biased(ExpRecorder &exp_recorder, Point query_point)
             if (iter != leafnode->children->end())
             {
                 //cout << "find it" << endl;
+                break;
+            }else{
+                //cout << "not found" << endl;
                 break;
             }
         }

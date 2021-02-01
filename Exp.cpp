@@ -405,6 +405,7 @@ void exp_ZM_query_test(FileWriter file_writer, ExpRecorder exp_recorder, vector<
     for(int i = 0;i < 5;i++){
             exp_recorder.clean();
             exp_recorder.k_num = ks[i];
+            cout << "knn query k : " << ks[i] << endl;
             partition->acc_kNN_query(exp_recorder, query_poitns, ks[i]);
             //partition->my_acc_kNN_query(exp_recorder, points, query_poitns, ks[i]);
             file_writer.write_acc_kNN_query(exp_recorder);
