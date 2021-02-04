@@ -1,7 +1,58 @@
+# RSMI，ZMの実験用リポジトリ
+## 使用ライブラリ
+- [Libtorch 1.4.0 CPU版](https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.4.0%2Bcpu.zip)←押したらダウンロードされます
+- [Boost]( https://www.boost.org/)
+
+## コンパイル
+- 上記ライブラリのディレクトリをRSMIディレクトリと同じ階層に配置
+    - もしくはMakefileのパスを変更
+- `make -f Makefile`
+    - 適宜 `make clean`
+
+## データセット作り方
+### 人工データ
+- 例：1000000点の一様分布データセットを得たいとき
+
+    `python data_generator.py -d uniform -s 1000000 -n 1 -f datasets/uniform_1000000_1_2_.csv -m 2`
+- オプションの意味
+    - -d : 分布
+    - -s : サイズ（点の数）
+    - -n : skewness(uniform,normalは1,skewedは4)
+    - -f : ファイル名
+    - -m : 次元数（2でしかやってません）
+- ファイル名の付け方
+    - "datasets/" + 分布 + "\_" + サイズ + "\_" + skeweness + "\_" + 次元数 + "_.csv"
+### 自然データ
+- [OpenStreetMap](https://download.geofabrik.de/)を使用するとき
+    - リンクから，得たい地域のosmファイルをダウンロード（すごく時間かかるので注意）
+    - osm2pgsqlを使用し，postgresqlにosmファイルをロード
+        - planet_osm_point 等のテーブルが作られるはず
+    - 人工データと同じ形でデータを取り出す
+    - 例：planet_osm_pointテーブルから0~1座標の取り出し
+        ~~~
+        copy
+        (
+        select (ST_X(way)- min_x)/(max_x - min_x) as x,(ST_Y(way) - min_y)/(max_y - min_y)as y,ROW_NUMBER() OVER() - 1 from planet_osm_point a,
+        (
+        select max(ST_X(way)) as max_x , min(ST_X(way)) as min_x, max(ST_Y(way)) as max_y , min(ST_Y(way)) as min_y from planet_osm_point b
+        )as sub
+        )
+        to 'D:\japan.csv' WITH CSV DELIMITER ',';
+        ~~~
+## 実行
+- RSMIの例：
+
+    `./Exp -c 1000000 -d uniform -s 1`
+- ZMの例：
+
+    `./Exp -c 1000000 -d uniform -s 1 -z`
+- オプションの意味
+    - -c : カーディナリティ（データサイズ）
+    - -d : 分布
+    - -s : skweness
+    - -z : ZMで実行
+## ↓オリジナル
 # RSMI
-
-
-
 
 ##  How to use
 

@@ -204,13 +204,15 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     exp_recorder.clean();
 
     /*
+    // test insert 
     partition->insert(exp_recorder, insert_points);
     cout << "insert_time , " << exp_recorder.insert_time << endl;
     exp_recorder.clean();
     partition->point_query(exp_recorder, points);
     //cout << "point_query_after_update pageaccess , " << exp_recorder.page_access << endl;
     cout << "point_query_after_update time , " << exp_recorder.time << endl;
-    exp_recorder.clean();*/
+    exp_recorder.clean();
+    */
 }
 
 void exp_RSMI_query_test(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> points, map<string, vector<Mbr>> mbrs_map, vector<Point> query_poitns, vector<Point> insert_points, string model_path)
@@ -351,13 +353,15 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     
     exp_recorder.clean();
     /*
+    // test insert
     partition->insert(exp_recorder, insert_points);
     cout << "insert time , " << exp_recorder.insert_time << endl;
     exp_recorder.clean();
     partition->point_query_after_update(exp_recorder, points);
     cout << "point_query_after_update time , " << exp_recorder.time << endl;
     //cout << "point_query_after_update pageaccess , " << exp_recorder.page_access << endl;
-    exp_recorder.clean();*/
+    exp_recorder.clean();
+    */
 }
 void exp_ZM_query_test(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> points, map<string, vector<Mbr>> mbrs_map, vector<Point> query_poitns, vector<Point> insert_points, string model_path)
 {
