@@ -37,7 +37,7 @@ public:
     int max_error = 0;
     int min_error = 0;
     int width = 0;
-    float learning_rate = 0.01;//Constants::LEARNING_RATE;
+    float learning_rate = Constants::LEARNING_RATE;// 0.01;//(used in real dataset)
 
     float w1[Constants::HIDDEN_LAYER_WIDTH * 2];
     float w1_[Constants::HIDDEN_LAYER_WIDTH];
@@ -403,7 +403,7 @@ public:
             for (size_t epoch = 0; epoch < Constants::EPOCH; epoch++)
             {
                 optimizer.zero_grad();
-                torch::Tensor loss = torch::mse_loss(this->forward(x), y);//l1
+                torch::Tensor loss = torch::l1_loss(this->forward(x), y);//l1 or mse(used in real dataset)
                 #ifdef use_gpu
                     loss.to(torch::kCUDA);
                 #endif

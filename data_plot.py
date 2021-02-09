@@ -10,6 +10,8 @@ elif distribution == "japan":
     file_name += distribution + "_2030818_1_2_.csv"
 elif distribution == "china":
     file_name += distribution + "_2677695_1_2_.csv"
+elif distribution == "usa":
+    file_name += distribution + "_17383488_1_2_.csv"
 else:
     file_name += distribution + "_1000000_1_2_.csv"
 
@@ -27,7 +29,6 @@ for row in f:
     ey += yi
     x.append(xi)
     y.append(yi)
-    
 '''
 ex /= len(x)
 ey /= len(y)
@@ -46,7 +47,6 @@ print("vx :",vx,", vy :",vy)
 print("covxy :",covxy)
 exit()
 '''
-
 fig = plt.figure(dpi=200)
 ax = fig.add_subplot(1,1,1)
 ax.scatter(x,y,marker=".",s=0.05)
