@@ -173,12 +173,13 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
 
     exp_recorder.clean();
     exp_recorder.k_num = ks[2];
-    partition->acc_kNN_query(exp_recorder, query_poitns, ks[2]);
-    //partition->my_acc_kNN_query(exp_recorder, points, query_poitns, ks[2]);
+    partition->acc_kNN_query(exp_recorder, query_poitns, ks[2]);// returns approx answer
+    //partition->my_acc_kNN_query(exp_recorder, points, query_poitns, ks[2]);// returns true answer
     cout << "acc_kNN_query time , " << exp_recorder.time << endl;
     //cout << "acc_kNN_query page_access , " << exp_recorder.page_access << endl;
     file_writer.write_acc_kNN_query(exp_recorder);
 
+    // original knn query that is fast but not collect algorithm
     partition->kNN_query(exp_recorder, query_poitns, ks[2]);
     cout << "kNN_query time , " << exp_recorder.time << endl;
     //cout << "kNN_query page_access , " << exp_recorder.page_access << endl;
@@ -187,6 +188,7 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     cout<< "kNN_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
     file_writer.write_kNN_query(exp_recorder);
 
+    // knn query that is fixed about retreaving strategy
     partition->my_kNN_query(exp_recorder, query_poitns, ks[2]);
     cout << "my_kNN_query time , " << exp_recorder.time << endl;
     //cout << "my_kNN_query page_access , " << exp_recorder.page_access << endl;
@@ -194,6 +196,7 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     cout<< "my_kNN_query accuracy , " << exp_recorder.accuracy << endl;
     cout<< "my_kNN_query accuracy_geometric , " << exp_recorder.accuracy_geometric << endl;
 
+    // kNN query that first window rate is 0.25 , fast but low accuracy
     partition->my_kNN_query_fast(exp_recorder, query_poitns, ks[2]);
     cout << "my_kNN_query_fast time , " << exp_recorder.time << endl;
     //cout << "my_kNN_query page_access , " << exp_recorder.page_access << endl;

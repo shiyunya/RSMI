@@ -707,10 +707,10 @@ void RSMI::window_query(ExpRecorder &exp_recorder, vector<Point> vertexes, Mbr q
             {
                 continue;
             }
-            /*if (exp_recorder.pq.size() >= k && dis > kth)
+            if (exp_recorder.pq.size() >= k && dis > kth)
             {
                 continue;
-            }*/
+            }
             if (leafnode.mbr.interact(query_window))
             {
                 exp_recorder.page_access += 1;
@@ -754,10 +754,10 @@ void RSMI::window_query(ExpRecorder &exp_recorder, vector<Point> vertexes, Mbr q
             {
                 continue;
             }
-            /*if (exp_recorder.pq.size() >= k && children[i].mbr.cal_dist(query_point) > kth)
+            if (exp_recorder.pq.size() >= k && children[i].mbr.cal_dist(query_point) > kth)
             {
                 continue;
-            }*/
+            }
             if (children[i].mbr.interact(query_window))
             {
                 children[i].window_query(exp_recorder, vertexes, query_window, boundary, k, query_point, kth);
