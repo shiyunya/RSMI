@@ -298,6 +298,8 @@ void exp_ZM(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> poin
     cout << "max_err , " << exp_recorder.max_error << endl;
     cout << "min_err , " << exp_recorder.min_error << endl;
 
+    partition->show_mbr();
+
     exp_recorder.clean();
     partition->point_query(exp_recorder, points);
     cout << "point_query time , " << exp_recorder.time << endl;

@@ -61,6 +61,7 @@ public:
     vector<vector<std::shared_ptr<Net>>> index;
 
     vector<int> stages;
+    vector<vector<Mbr>> Mbrs;
 
     vector<float> xs;
     vector<float> ys;
@@ -109,6 +110,8 @@ public:
 
     void remove(ExpRecorder &exp_recorder, Point);
     void remove(ExpRecorder &exp_recorder, vector<Point>);
+
+    void show_mbr();
 };
 
 ZM::ZM()
@@ -203,6 +206,7 @@ void ZM::build(ExpRecorder &exp_recorder, vector<Point> points)
         // initialize
         vector<std::shared_ptr<Net>> temp_index;
         vector<vector<Point>> temp_points;
+        vector<Mbr> tmp_mbrs;
         int next_stage_length = 0;
         if (i < stages.size() - 1)
         {
@@ -221,6 +225,7 @@ void ZM::build(ExpRecorder &exp_recorder, vector<Point> points)
         // build
         for (size_t j = 0; j < stages[i]; j++)
         {
+            Mbr tmp_mbr;
             model_path = model_path_root + "_" + to_string(i) + "_" + to_string(j);
             auto net = std::make_shared<Net>(1);
             #ifdef use_gpu
@@ -257,6 +262,7 @@ void ZM::build(ExpRecorder &exp_recorder, vector<Point> points)
                 temp_index.push_back(net);
                 for (Point point : tmp_records[i][j])
                 {
+                    tmp_mbr.update(point.x,point.y);
                     //torch::Tensor res = net->forward(torch::tensor({point.normalized_curve_val}));
                     //int pos = 0;
                     long long pos;
@@ -304,6 +310,7 @@ void ZM::build(ExpRecorder &exp_recorder, vector<Point> points)
                         }
                     }
                 }
+                tmp_mbrs.push_back(tmp_mbr);
                 net->max_error = max_error;
                 net->min_error = min_error;
                 if ((max_error - min_error) > (zm_max_error - zm_min_error))
@@ -322,6 +329,7 @@ void ZM::build(ExpRecorder &exp_recorder, vector<Point> points)
                 std::cerr << e.what() << '\n';
             }
         }
+        Mbrs.push_back(tmp_mbrs);
         index.push_back(temp_index);
         // cout << "size of stages:" << stages[i] << endl;
     }
@@ -1080,4 +1088,12 @@ void ZM::remove(ExpRecorder &exp_recorder, vector<Point> points)
     long long old_time_cost = exp_recorder.delete_time * exp_recorder.delete_num;
     exp_recorder.delete_num += points.size();
     exp_recorder.delete_time = (old_time_cost + chrono::duration_cast<chrono::nanoseconds>(finish - start).count()) / exp_recorder.delete_num;
+}
+
+void ZM::show_mbr(){
+    for (int i = 0 ;i < Mbrs.size(); i++){
+        for (Mbr mbr : Mbrs[i]){
+            cout << "level : " << i << " , mbr : ( " << mbr.x1 << " , " << mbr.y1 << " ) , ( "<< mbr.x2 << " , " << mbr.y2 << " )" << endl;
+        }
+    }
 }
