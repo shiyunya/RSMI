@@ -88,6 +88,7 @@ public:
 
     void remove(ExpRecorder &exp_recorder, Point);
     void remove(ExpRecorder &exp_recorder, vector<Point>);
+    void show_mbr();
 };
 
 RSMI::RSMI()
@@ -1310,4 +1311,26 @@ double RSMI::cal_rho(Point point)
     result = result > 1 ? result : 1;
     result = result > 4 ? 4 : result;
     return result;
+}
+
+void RSMI::show_mbr()
+{
+    if (is_last)
+    {
+        cout << "level : " << level << " , mbr : ( " << mbr.x1 << " , " << mbr.y1 << " ) , ( "<< mbr.x2 << " , " << mbr.y2 << " )" << endl;
+        return;
+    }
+    else
+    {
+        cout << "level : " << level << " , mbr : ( " << mbr.x1 << " , " << mbr.y1 << " ) , ( "<< mbr.x2 << " , " << mbr.y2 << " )" << endl;
+        for (size_t i = 0; i <= width; i++)
+        {
+            if (children.count(i) == 0)
+            {
+                continue;
+            }else{
+                children[i].show_mbr();
+            }
+        }
+    }
 }

@@ -149,6 +149,8 @@ void exp_RSMI(FileWriter file_writer, ExpRecorder exp_recorder, vector<Point> po
     //cout << "max_err , " << exp_recorder.max_error << endl;
     //cout << "min_err , " << exp_recorder.min_error << endl;
 
+    partition->show_mbr();
+
     exp_recorder.clean();
     partition->point_query(exp_recorder, points);
     //cout << "point_query pageaccess , " << exp_recorder.page_access << endl;
