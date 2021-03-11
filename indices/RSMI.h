@@ -1117,7 +1117,7 @@ void RSMI::acc_kNN_query(ExpRecorder &exp_recorder, vector<Point> query_points, 
 
 vector<Point> RSMI::acc_kNN_query(ExpRecorder &exp_recorder, Point query_point, int k)
 {
-    double rh0 = 10;//cal_rho(query_point);
+    double rh0 = 1;//cal_rho(query_point);
     vector<Point> result;
     float knnquery_side = sqrt((float)k / N) * rh0;
     while (true)

@@ -30,11 +30,19 @@ def calc_Z(x,y):
     for i in range(bit_num):
         seed = pow(2,i)
         tmp = seed & x
+        tmp = tmp << i
         result += tmp
-        temp = seed & y
-        temp = temp << (i+1)
+        tmp = seed & y
+        tmp = tmp << (i+1)
         result += tmp
     return result
+
+def my_calc_Z(x,y):
+    z = 0
+    for i in range(bit_num):
+        z += pow(2,i*2+1)*(y >> i & 1)
+        z += pow(2,i*2)*(x >> i & 1)
+    return z
 
 for row in f:
     #print(row)

@@ -73,7 +73,7 @@ if ans == "y":
         y1 = float(l[9])
         x2 = float(l[13])
         y2 = float(l[15])
-        lw = 0.1 / level
+        lw = 0.5 / level
         width = x2 - x1
         height = y2 -y1
         r = patches.Rectangle(xy=(x1, y1), width = width, height = height, ec=color, linewidth = str(lw) ,fill=False)
